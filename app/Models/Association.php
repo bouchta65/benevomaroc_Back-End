@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Association extends User
 {
     protected $fillable = [
-        'description', 'telephone', 'adresse', 'ville', 'code_postal', 'site_web', 'logo', 'status'
+        'fonction_occupee', 'nom_association', 'sigle_association', 'numero_rna_association', 'objet_social', 'site_web', 'logo', 
+        'presentation_association', 'principales_reussites'
     ];
+    
 
     public function evenements()
     {
