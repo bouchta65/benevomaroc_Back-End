@@ -7,10 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Benevole extends User
 {
     protected $fillable = [
-        'domaines_action', 'types_mission', 'disponibilites', 'missions_preferrees', 'talents','niveau_etudes','metier','cv'
+        'user_id','domaines_action', 'types_mission', 'disponibilites', 'missions_preferrees', 'talents','niveau_etudes','metier','cv'
     ];
     
- 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function evenements()
     {
         return $this->belongsToMany(Evenement::class);   

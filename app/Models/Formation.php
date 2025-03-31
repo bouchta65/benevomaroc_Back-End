@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Formation extends Model
 {
     protected $fillable = [
-        'nom', 'description' 
+        'nom', 'description' , 'src' , 'type'
     ];
 
     public function benevoles()
