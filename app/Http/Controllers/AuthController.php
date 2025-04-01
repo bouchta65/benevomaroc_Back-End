@@ -150,4 +150,26 @@ class AuthController extends Controller
 
 
 
+    public function login(Request $request) {
+        $validatedData = $request->validate([
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string|min:8',
+        ]);
+
+        try {
+            $user = User::where('email', $validatedData['email'])->first();
+
+            if (!$user || !Hash::check($validatedData['password'], $user->password)) {
+                return response()->json(["message" => "Email or password is incorrect"], 401);
+            }
+
+            $token = $user->createToken("AuthSanctum", ["*"], now()->addMinutes(10000))->plainTextToken;
+
+            return response()->json(["message" => "User successfully logged in", "token" => $token], 200);
+        } catch (\Exception $e) {
+            return response()->json(["message" => "Error", "error" => $e->getMessage()], 500);
+        }
+    }
+
+  
 }
