@@ -238,8 +238,62 @@ class AuthController extends Controller
             return response()->json(["message" => "Erreur de mise à jour", "error" => $e->getMessage()], 500);
         }
     }
+    
+    public function updateAssociation(Request $request)
+    {
+        $request->validate([
+            'civilite' => 'sometimes|string',
+            'prenom' => 'sometimes|string',
+            'nom' => 'sometimes|string',
+            'email' => 'sometimes|string|email|unique:users,email,',
+            'password' => 'sometimes|string|min:8',
+            'image' => 'nullable|string',
+            'cin' => 'sometimes|string|unique:users,cin,',
+            'adresse' => 'nullable|string',
+            'date_naissance' => 'nullable|date',
+            'code_postal' => 'nullable|string',
+            'ville' => 'nullable|string',
+            'telephone_1' => 'nullable|string',
+            'telephone_2' => 'nullable|string',
+            'fonction_occupee' => 'sometimes|string',
+            'nom_association' => 'sometimes|string',
+            'sigle_association' => 'sometimes|string',
+            'numero_rna_association' => 'sometimes|string',
+            'objet_social' => 'sometimes|string',
+            'site_web' => 'nullable|string',
+            'logo' => 'nullable|string',
+            'presentation_association' => 'nullable|string',
+            'principales_reussites' => 'nullable|string',
+        ]);
 
-   
+        try {
+            $id = Auth::user()->id;
+            $user = User::findOrFail($id);
+            $association = Association::where('user_id', $id)->firstOrFail();
+
+            $userData = $request->only([
+                'civilite', 'prenom', 'nom', 'email', 'image', 'cin', 'adresse',
+                'date_naissance', 'code_postal', 'ville', 'telephone_1', 'telephone_2'
+            ]);
+
+            if ($request->has('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+
+            $user->update($userData);
+
+            $association->update($request->only([
+                'fonction_occupee', 'nom_association', 'sigle_association',
+                'numero_rna_association', 'objet_social', 'site_web', 'logo',
+                'presentation_association', 'principales_reussites'
+            ]));
+
+            return response()->json(["message" => "Association mise à jour avec succès", "user" => $user], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(["message" => "Erreur de mise à jour", "error" => $e->getMessage()], 500);
+        }
+    }
 
 
 
