@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Evenement;
+
+class EventController extends Controller
+{
+
+    public function addEvent(Request $request)
+    {
+        $validated = $request->validate([
+            'titre' => 'required|string',
+            'description' => 'required|string',
+            'date' => 'required|date',
+            'derniere_date_postule' => 'required|date',
+            'ville' => 'required|string',
+            'adresse' => 'required|string',
+            'association_id' => 'required|integer',
+            'categorie_id' => 'required|integer',
+            'image' => 'nullable|string',
+            'status' => 'required|string',
+            'nb_benevole' => 'required|integer',
+            'duree' => 'nullable|string',
+            'engagement_requis' => 'nullable|string',
+        ]);
+    
+        try {
+            $evenement = Evenement::create([
+                'titre' => $validated['titre'],
+                'description' => $validated['description'],
+                'date' => $validated['date'],
+                'derniere_date_postule' => $validated['derniere_date_postule'],
+                'ville' => $validated['ville'],
+                'adresse' => $validated['adresse'],
+                'association_id' => $validated['association_id'],
+                'categorie_id' => $validated['categorie_id'],
+                'image' => $validated['image'],
+                'status' => $validated['status'],
+                'nb_benevole' => $validated['nb_benevole'],
+                'duree' => $validated['duree'],
+                'engagement_requis' => $validated['engagement_requis'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return response()->json(['message' => 'Événement créé avec succès', 'event' => $evenement], 201);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la création de l\'événement', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    
+
+
+
+
+
+}
