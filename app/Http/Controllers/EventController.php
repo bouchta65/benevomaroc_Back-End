@@ -41,8 +41,6 @@ class EventController extends Controller
                 'nb_benevole' => $validated['nb_benevole'],
                 'duree' => $validated['duree'],
                 'engagement_requis' => $validated['engagement_requis'],
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
 
             return response()->json(['message' => 'Événement créé avec succès', 'event' => $evenement], 201);
@@ -53,7 +51,37 @@ class EventController extends Controller
     }
 
 
-    
+    public function updateEvent(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'titre' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'date' => 'sometimes|date',
+            'derniere_date_postule' => 'sometimes|date',
+            'ville' => 'sometimes|string',
+            'adress' => 'sometimes|string',
+            'association_id' => 'sometimes|exists:associations,id',
+            'categorie_id' => 'sometimes|exists:categories,id',
+            'image' => 'nullable|string',
+            'status' => 'sometimes|string',
+            'nb_benevole' => 'sometimes|integer',
+            'duree' => 'sometimes|string',
+            'engagement_requis' => 'sometimes|string',
+        ]);
+
+        try {
+            $event = Evenement::findOrFail($id);
+
+            $event->update($validatedData);
+
+            return response()->json(['message' => 'Événement mis à jour avec succès', 'event' => $event], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la mise à jour de l\'événement', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+   
 
 
 
