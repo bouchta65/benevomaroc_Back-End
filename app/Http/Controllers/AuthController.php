@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Association;
@@ -183,4 +184,63 @@ class AuthController extends Controller
             return response()->json(["message"=>"error","error"=>$e->getMessage()],500);
         }
     }
+
+    public function updateBenevole(Request $request)
+    {
+        $request->validate([
+            'civilite' => 'sometimes|string',
+            'prenom' => 'sometimes|string',
+            'nom' => 'sometimes|string',
+            'email' => 'sometimes|string|email|unique:users,email,',
+            'password' => 'sometimes|string|min:8',
+            'image' => 'nullable|string',
+            'cin' => 'sometimes|string|unique:users,cin,',
+            'adresse' => 'nullable|string',
+            'date_naissance' => 'nullable|date',
+            'code_postal' => 'nullable|string',
+            'ville' => 'nullable|string',
+            'telephone_1' => 'nullable|string',
+            'telephone_2' => 'nullable|string',
+            'domaines_action' => 'sometimes|string',
+            'types_mission' => 'sometimes|string',
+            'disponibilites' => 'sometimes|string',
+            'missions_preferrees' => 'nullable|string',
+            'talents' => 'nullable|string',
+            'niveau_etudes' => 'nullable|string',
+            'metier' => 'nullable|string',
+            'cv' => 'nullable|string',
+        ]);
+
+        try {
+            $id = Auth::user()->id;
+            $user = User::findOrFail($id);
+            $benevole = Benevole::where('user_id', $id)->firstOrFail();
+
+            $userData = $request->only([
+                'civilite', 'prenom', 'nom', 'email', 'image', 'cin', 'adresse', 
+                'date_naissance', 'code_postal', 'ville', 'telephone_1', 'telephone_2'
+            ]);
+
+            if ($request->has('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+
+            $user->update($userData);
+
+            $benevole->update($request->only([
+                'domaines_action', 'types_mission', 'disponibilites', 
+                'missions_preferrees', 'talents', 'niveau_etudes', 'metier', 'cv'
+            ]));
+
+            return response()->json(["message" => "Bénévole mis à jour avec succès", "user" => $user], 200);
+        
+        } catch (\Exception $e) {
+            return response()->json(["message" => "Erreur de mise à jour", "error" => $e->getMessage()], 500);
+        }
+    }
+
+   
+
+
+
 }
