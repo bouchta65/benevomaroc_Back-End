@@ -27,8 +27,10 @@ return new class extends Migration
             $table->string('telephone_1')->nullable();
             $table->string('telephone_2')->nullable();
             $table->timestamp('email_verified_at')->nullable();
+            $table->enum('role', ['benevole', 'association', 'admin'])->default('benevole');
             $table->rememberToken();
             $table->timestamps();
+            
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

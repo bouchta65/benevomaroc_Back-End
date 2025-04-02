@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Benevole extends User
+class Benevole extends Model
 {
     protected $fillable = [
         'user_id','domaines_action', 'types_mission', 'disponibilites', 'missions_preferrees', 'talents','niveau_etudes','metier','cv'
