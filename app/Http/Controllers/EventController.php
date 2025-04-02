@@ -81,7 +81,19 @@ class EventController extends Controller
         }
     }
 
-   
+    public function deleteEvent($id)
+    {
+        try {
+            $event = Evenement::findOrFail($id);
+
+            $event->delete();
+
+            return response()->json(['message' => 'Événement supprimé avec succès'], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la suppression de l\'événement', 'error' => $e->getMessage()], 500);
+        }
+    }
 
 
 
