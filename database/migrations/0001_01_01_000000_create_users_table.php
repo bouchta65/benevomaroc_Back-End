@@ -13,18 +13,17 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('civilite', 10);
+            $table->string('civilite');
             $table->string('prenom');
             $table->string('nom');
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('image')->nullable();
-            $table->string('cin')->unique();
-            $table->string('adresse')->nullable();
-            $table->date('date_naissance')->nullable();
-            $table->string('code_postal', 10)->nullable();
-            $table->string('ville')->nullable();
-            $table->string('telephone_1')->nullable();
+            $table->string('image');
+            $table->string('cin');
+            $table->string('adresse');
+            $table->date('date_naissance');
+            $table->string('ville');
+            $table->string('telephone_1');
             $table->string('telephone_2')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('role', ['benevole', 'association', 'admin'])->default('benevole');
