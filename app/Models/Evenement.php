@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Evenement extends Model
 {
     protected $fillable = [
-        'nom', 'description', 'date', 'derniere_date_Postule' ,'Ville', 'Adress' , 'association_id' , 'categorie_id' , 'image' , 'status' , 'nb_benevole' , 'Duree' , 'Engagement_requis'
+        'titre', 'description', 'date', 'derniere_date_postule' ,'ville', 'adresse' , 'association_id' , 'categorie_id' , 'image' , 'status' , 'nb_benevole' , 'duree' , 'engagement_requis'
     ];
 
     public function association()
