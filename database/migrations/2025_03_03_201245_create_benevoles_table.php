@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('types_mission');
             $table->string('disponibilites');
             $table->text('missions_preferrees');
-            $table->text('talents');
-            $table->string('niveau_etudes');
+            $table->text('talents')->nullable();
+            $table->string('niveau_etudes')->nullable();
             $table->string('metier')->nullable();
             $table->string('cv')->nullable();
             $table->timestamps();
