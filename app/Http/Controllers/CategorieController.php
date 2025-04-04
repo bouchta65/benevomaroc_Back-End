@@ -26,5 +26,31 @@ class CategorieController extends Controller
         }
 
 
-}
+    }
+
+    public function updateCategorie(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'nom' => 'sometimes|required|string',
+            'description' => 'sometimes|required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => "Erreur de validation", "errors" => $validator->errors()], 422);
+        }
+
+        try {
+            $categorie = Categorie::findOrFail($id);
+            $categorie->update($request->only(['nom', 'description']));
+
+            return response()->json(["message" => "Catégorie mise à jour avec succès", "categorie" => $categorie], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la mise à jour de la catégorie', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+  
+
+
+
 }
