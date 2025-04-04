@@ -61,4 +61,15 @@ class CategorieController extends Controller
         }
     }
 
+    public function getCategorie()
+    {
+        try {
+            $categorie = Categorie::All();
+
+            return response()->json(["categorie" => $categorie], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Catégorie non trouvée', 'error' => $e->getMessage()], 404);
+        }
+    }
+
 }
