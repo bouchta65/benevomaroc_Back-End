@@ -49,8 +49,16 @@ class CategorieController extends Controller
         }
     }
 
-  
+    public function deleteCategorie($id)
+    {
+        try {
+            $categorie = Categorie::findOrFail($id);
+            $categorie->delete();
 
-
+            return response()->json(["message" => "Catégorie supprimée avec succès"], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la suppression de la catégorie', 'error' => $e->getMessage()], 500);
+        }
+    }
 
 }
