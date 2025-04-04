@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignId('association_id')->constrained('associations')->onDelete('cascade');
             $table->foreignId('categorie_id')->constrained('categories')->onDelete('cascade');  
             $table->string('image')->nullable();  
-            $table->enum('status', ['actif', 'en attente', 'fermé']);
+            $table->enum('status', ['actif', 'en attente', 'fermé'])->default('en attente');
             $table->integer('nb_benevole');
             $table->string('duree');  
             $table->string('engagement_requis');  
