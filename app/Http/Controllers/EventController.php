@@ -4,9 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Evenement;
+use App\Services\PostulationService;
+
 
 class EventController extends Controller
 {
+    protected $postulationService;
+
+    public function __construct(PostulationService $postulationService)
+    {
+        $this->postulationService = $postulationService;
+    }
 
     public function addEvent(Request $request)
     {
@@ -94,6 +102,21 @@ class EventController extends Controller
             return response()->json(['message' => 'Erreur lors de la suppression de l\'événement', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function getAllEvent()
+    {
+        try {
+            $event = Evenement::All();
+
+            return response()->json(['events' => $event], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la récupération de l\'événement','error' => $e->getMessage()], 500);
+        }
+    }
+
+  
+
 
 
 
