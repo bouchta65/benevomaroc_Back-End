@@ -73,5 +73,26 @@ class postuleController extends Controller
         }
     }
 
-  
+    public function changeStatusBnenvole(Request $request, $event_id,$benevole_id)
+    {
+        try {
+            $request->validate([
+                'etat' => 'required|string',
+            ]);
+    
+            $postulation = Postule::where('benevole_id', $benevole_id)->where('evenement_id',$event_id)->first();
+
+            if (!$postulation) {
+                return response()->json(['message' => 'Aucune postulation trouvée pour ce bénévole et cet événement.'], 404);  
+            }
+    
+            $postulation->etat = $request->etat;
+            $postulation->save();
+    
+            return response()->json(['message' => 'etat de la postulation mis à jour avec succès.','postulation' => $postulation], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la mise à jour du etat de la postulation.','error' => $e->getMessage()], 500);
+        }
+    }
 }
