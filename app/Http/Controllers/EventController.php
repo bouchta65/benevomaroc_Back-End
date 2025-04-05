@@ -115,7 +115,23 @@ class EventController extends Controller
         }
     }
 
-  
+    public function getEventById($event_id)
+    {
+        try {
+            $event = Evenement::find($event_id);
+
+            if (!$event) {
+                return response()->json(['message' => 'Événement non trouvé.'], 404);
+            }
+
+            $status = $this->postulationService->getPostulationStatus($event_id);
+
+            return response()->json(['event' => $event , 'status'=>$status], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la récupération de l\'événement','error' => $e->getMessage()], 500);
+        }
+    }
 
 
 
