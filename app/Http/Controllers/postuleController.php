@@ -40,13 +40,28 @@ class postuleController extends Controller
         }
     }
 
-    public function postulationByEvent($event_id){
-        try{
-            $postulation = Postule::where('evenement_id',$event_id)->get();
-            return response()->json(["message" => "Postulations récupérées avec succès. ", "postulation" => $postulation], 201);
+    public function cancelPostulation($event_id)
+    {
+        try {
+            $benevole_id = Benevole::where('user_id', Auth::user()->id)->first();
 
-        }catch(\Exception $e){
-            return response()->json(['message' => 'Erreur lors de l\'ajout de la postulation', 'error' => $e->getMessage()], 500);
+            $postulation = Postule::where('benevole_id', $benevole_id->id)->where('evenement_id', $event_id)->first();
+
+            if (!$postulation) {
+                return response()->json([
+                    'message' => 'Aucune postulation trouvée pour ce bénévole et cet événement.'], 404); 
+            }
+
+            $postulation->delete();
+
+            return response()->json(['message' => 'Postulation supprimée avec succès.'], 200); 
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la suppression de la postulation','error' => $e->getMessage()], 500); 
         }
     }
+
+
+
+    
 }
