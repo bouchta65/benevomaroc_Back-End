@@ -63,5 +63,15 @@ class postuleController extends Controller
 
 
 
-    
+    public function postulationByEvent($event_id){
+        try{
+            $postulation = Postule::where('evenement_id',$event_id)->get();
+            return response()->json(["message" => "Postulations récupérées avec succès. ", "postulation" => $postulation], 201);
+
+        }catch(\Exception $e){
+            return response()->json(['message' => 'Erreur lors de l\'ajout de la postulation', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+  
 }
