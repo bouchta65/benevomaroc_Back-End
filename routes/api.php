@@ -12,17 +12,16 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
-    Route::put('/association', [AuthController::class, 'updateAssociation']);
-    Route::post('/evenement',[EventController::class,'addEvent']);
-    Route::put('/evenement/{id}',[EventController::class,'updateEvent']);
-    Route::delete('/evenement/{id}',[EventController::class,'deleteEvent']);
+    Route::post('/dashboard/evenement',[EventController::class,'addEvent']);
 });
 
 Route::middleware(['auth:sanctum', 'role:association','CheckEventOwner'])->group(function () {
-    Route::put('/evenement/{id}',[EventController::class,'updateEvent']);
-    Route::delete('/evenement/{id}',[EventController::class,'deleteEvent']);
-    Route::get('/evenement/{id}/postulations',[postuleController::class,'postulationByEvent']);
-    Route::put('/evenement/{id}/postulations/{benevole_id}', [PostuleController::class, 'changeStatusBnenvole']);
+    Route::put('/dashboard/evenement/{id}',[EventController::class,'updateEvent']);
+    Route::delete('/dashboard/evenement/{id}',[EventController::class,'deleteEvent']);
+    Route::get('/dashboard/evenement/{id}/postulations',[postuleController::class,'postulationByEvent']);
+    Route::put('/dashboard/evenement/{id}/postulations/{benevole_id}', [PostuleController::class, 'changeStatusBnenvole']);
+    Route::put('/dashboard/association', [AuthController::class, 'updateAssociation']);
+
 });
 
 Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
@@ -30,10 +29,11 @@ Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
     Route::post('/evenement/{id}', [postuleController::class, 'addPostulation']);
     Route::delete('/evenement/{id}', [postuleController::class, 'cancelPostulation']);
     Route::get('/evenement/{id}', [EventController::class, 'getEventById']);
+    Route::get('/MesPostulations', [postuleController::class, 'benevolePostulation']);
 
 });
 
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
     Route::post('/categorie', [CategorieController::class, 'addCategorie']);
     Route::put('/categorie/{id}', [CategorieController::class, 'updateCategorie']);
     Route::delete('/categorie/{id}', [CategorieController::class, 'deleteCategorie']);
