@@ -37,7 +37,7 @@ class postuleController extends Controller
             $postulation =  Postule::create([
                 'benevole_id' => $benevole_id->id,
                 'evenement_id' => $event_id,
-                'etat' => 'en attent', 
+                'etat' => 'en attente', 
                 'date' => Carbon::now(), 
             ]);
 
@@ -102,4 +102,22 @@ class postuleController extends Controller
             return response()->json(['message' => 'Erreur lors de la mise à jour du etat de la postulation.','error' => $e->getMessage()], 500);
         }
     }
+
+    public function benevolePostulation()
+    {
+        try {
+            $benevole = Benevole::where('user_id', Auth::user()->id)->first();
+    
+            $postulations = Postule::where('benevole_id', $benevole->id)->get();
+    
+            if ($postulations->isEmpty()) {
+                return response()->json(['message' => 'Aucune postulation trouvée'], 404);
+            }
+    
+            return response()->json(['message' => 'Postulations récupérées avec succès', 'postulations' => $postulations], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la récupération des postulations', 'error' => $e->getMessage()], 500);
+        }
+    }
+    
 }
