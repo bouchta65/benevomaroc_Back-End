@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Postule;
 use App\Models\Benevole;
+use App\Models\Evenement;
 
 
 class postuleController extends Controller
@@ -22,12 +23,18 @@ class postuleController extends Controller
     {
         try {
 
+        $evenement = Evenement::where('id', $event_id)->where('status', 'actif')->first();
+
+            if (!$evenement) {
+                return response()->json(["message" => "Événement introuvable ou non actif"], 404);
+            }
+
             if($this->hasAlreadyPostulated($event_id)){
                 return response()->json(["message" => "Vous avez déjà postulé pour cet événement"], 400);
             }
             $benevole_id = Benevole::where('user_id',Auth::user()->id)->first();
 
-            $postulation = Postule::create([
+            $postulation =  Postule::create([
                 'benevole_id' => $benevole_id->id,
                 'evenement_id' => $event_id,
                 'etat' => 'en attent', 
