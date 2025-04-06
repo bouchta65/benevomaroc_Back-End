@@ -28,7 +28,6 @@ class EventController extends Controller
             'association_id' => 'required|integer',
             'categorie_id' => 'required|integer',
             'image' => 'nullable|string',
-            'status' => 'required|string',
             'nb_benevole' => 'required|integer',
             'duree' => 'nullable|string',
             'engagement_requis' => 'nullable|string',
@@ -45,13 +44,12 @@ class EventController extends Controller
                 'association_id' => $validated['association_id'],
                 'categorie_id' => $validated['categorie_id'],
                 'image' => $validated['image'],
-                'status' => $validated['status'],
                 'nb_benevole' => $validated['nb_benevole'],
                 'duree' => $validated['duree'],
                 'engagement_requis' => $validated['engagement_requis'],
             ]);
 
-            return response()->json(['message' => 'Événement créé avec succès', 'event' => $evenement], 201);
+            return response()->json(['message' => 'Événement créé avec succès. En attente d’activation par un administrateur.', 'event' => $evenement], 201);
 
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erreur lors de la création de l\'événement', 'error' => $e->getMessage()], 500);
