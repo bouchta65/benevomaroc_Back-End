@@ -91,6 +91,46 @@ class ProfileController extends Controller
     }
 
 
+    public function updateBenevoleDetails(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'domaines_action' => 'sometimes|string',
+            'types_mission' => 'sometimes|string',
+            'disponibilites' => 'sometimes|string',
+            'missions_preferrees' => 'nullable|string',
+            'talents' => 'nullable|string',
+            'niveau_etudes' => 'nullable|string',
+            'metier' => 'nullable|string',
+            'cv' => 'nullable|file|mimes:pdf|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => "Erreur de validation", "errors" => $validator->errors()], 422);
+        }
+
+        $user = Auth::user();
+        $benevole = Benevole::where('user_id', $user->id)->firstOrFail();
+
+        $benevole->update($request->only([
+            'domaines_action', 'types_mission', 'disponibilites',
+            'missions_preferrees', 'talents', 'niveau_etudes', 'metier'
+        ]));
+
+        if ($request->hasFile('cv')) {
+            if ($benevole->cv) {
+                Storage::disk('public')->delete($benevole->cv);
+            }
+
+            $folderName = Str::slug($user->cin, '_');
+            $cvPath = $request->file('cv')->store("benevoles/{$folderName}", 'public');
+            $benevole->update(['cv' => $cvPath]);
+        }
+
+        return response()->json(["message" => "Informations bénévoles mises à jour avec succès", "benevole" => $benevole], 200);
+    }
+
+
+    
     
 
 
