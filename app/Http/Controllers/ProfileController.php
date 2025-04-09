@@ -191,8 +191,29 @@ class ProfileController extends Controller
         return response()->json(["message" => "Mot de passe mis à jour avec succès"], 200);
     }
   
-
-
+    public function reset()
+    {
+        try {
+            $id = Auth::user()->id;
+            $user = User::findOrFail($id);
+    
+            $newPassword = Str::random(12);
+    
+            $user->password = Hash::make($newPassword);
+            $user->save();
+    
+            Mail::raw("Bonjour {$user->prenom},\n\nVoici votre nouveau mot de passe : {$newPassword}\n\nPensez à le changer après connexion.", function ($message) use ($user) {
+                $message->to($user->email) 
+                        ->subject('Nouveau mot de passe - Votre site');
+            });
+    
+            return response()->json(['message' => 'Un nouveau mot de passe a été envoyé à votre email.'], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur de réinitialisation du mot de passe', 'error' => $e->getMessage()], 500);
+        }
+    }
+    
     
 
 
