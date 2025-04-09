@@ -36,8 +36,61 @@ class ProfileController extends Controller
         }
     }
 
-    
-    
+    public function updateUserInfo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'prenom' => 'sometimes|string',
+            'nom' => 'sometimes|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'adresse' => 'nullable|string',
+            'date_naissance' => 'nullable|date',
+            'ville' => 'nullable|string',
+            'telephone_1' => 'nullable|string',
+            'telephone_2' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => "Erreur de validation", "errors" => $validator->errors()], 422);
+        }
+
+        $id = Auth::user()->id;
+        $user = User::findOrFail($id);
+
+        $userData = $request->only([
+            'prenom', 'nom', 'adresse', 'date_naissance', 'ville', 'telephone_1', 'telephone_2'
+        ]);
+
+        $user->update($userData);
+
+        if ($request->hasFile('image')) {
+            if ($user->image) {
+                Storage::disk('public')->delete($user->image);
+            }
+
+        
+            $folderName = '';
+            $imagePath = '';
+            if ($user->hasRole('benevole')) {
+                $folderName = Str::slug($user->cin, '_'); 
+                $imagePath = $request->file('image')->store("benevoles/{$folderName}", 'public');
+
+            } elseif ($user->hasRole('association')) {
+                $association = Association::where('user_id', $user->id)->first(); 
+                $folderName = Str::slug($association->nom_association . '_' . $association->numero_rna_association, '_');
+                $imagePath = $request->file('image')->store("associations/{$folderName}", 'public');
+
+            } elseif ($user->hasRole('admin')) {
+                $folderName = 'admin_' . Str::slug($user->cin, '_'); 
+                $imagePath = $request->file('image')->store("admins/{$folderName}", 'public');
+            }
+
+            $user->update(['image' => $imagePath]);
+        }
+
+        return response()->json(["message" => "Profil mis à jour avec succès", "user" => $user], 200);
+    }
+
+
     
 
 
