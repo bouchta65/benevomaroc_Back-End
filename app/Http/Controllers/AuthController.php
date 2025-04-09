@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -24,7 +23,8 @@ class AuthController extends Controller
             'prenom' => 'required|string',
             'nom' => 'required|string',
             'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => ['required','string','confirmed',
+            Password::min(8)->mixedCase()->letters()->numbers()->symbols()],
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'cin' => 'required|string|unique:users',
             'adresse' => 'required|string',
@@ -96,7 +96,7 @@ class AuthController extends Controller
             'prenom' => 'required|string',
             'nom' => 'required|string',
             'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:8|confirmed',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'cin' => 'required|string|unique:users',
             'adresse' => 'required|string',
@@ -201,138 +201,7 @@ class AuthController extends Controller
         }
     }
 
-    public function updateBenevole(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'prenom' => 'sometimes|string',
-            'nom' => 'sometimes|string',
-            'password' => 'sometimes|string|min:8',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'adresse' => 'nullable|string',
-            'date_naissance' => 'nullable|date',
-            'ville' => 'nullable|string',
-            'telephone_1' => 'nullable|string',
-            'telephone_2' => 'nullable|string',
-            'domaines_action' => 'sometimes|string',
-            'types_mission' => 'sometimes|string',
-            'disponibilites' => 'sometimes|string',
-            'missions_preferrees' => 'nullable|string',
-            'talents' => 'nullable|string',
-            'niveau_etudes' => 'nullable|string',
-            'metier' => 'nullable|string',
-            'cv' => 'nullable|file|mimes:pdf|max:2048',
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json(["message" => "Erreur de validation","errors" => $validator->errors()], 422);
-        }
-
-        try {
-            $id = Auth::user()->id;
-            $user = User::findOrFail($id);
-            $benevole = Benevole::where('user_id', $id)->firstOrFail();
-
-            $userData = $request->only([
-                 'prenom', 'nom', 'adresse', 
-                'date_naissance','ville', 'telephone_1', 'telephone_2'
-            ]);
-
-            if ($request->has('password')) {
-                $userData['password'] = Hash::make($request->password);
-            }
-
-            $user->update($userData);
-
-            $benevole->update($request->only([
-                'domaines_action', 'types_mission', 'disponibilites', 
-                'missions_preferrees', 'talents', 'niveau_etudes', 'metier'
-            ]));
-
-            if ($request->hasFile('image')) {
-                if ($user->image) {
-                    Storage::disk('public')->delete($user->image);
-                }
-    
-                $folderName = Str::slug($user->cin, '_');
-                $imagePath = $request->file('image')->store("benevoles/{$folderName}", 'public');
-                $user->update(['image' => $imagePath]);
-            }
-    
-            if ($request->hasFile('cv')) {
-                if ($benevole->cv) {
-                    Storage::disk('public')->delete($benevole->cv);
-                }
-    
-                $folderName = Str::slug($user->cin, '_');
-                $cvPath = $request->file('cv')->store("benevoles/{$folderName}", 'public');
-                $benevole->update(['cv' => $cvPath]);
-            }
-
-            return response()->json(["message" => "Bénévole mis à jour avec succès", "user" => $user], 200);
-        
-        } catch (\Exception $e) {
-            return response()->json(["message" => "Erreur de mise à jour", "error" => $e->getMessage()], 500);
-        }
-    }
-    
-    public function updateAssociation(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'prenom' => 'sometimes|string',
-            'nom' => 'sometimes|string',
-            'password' => 'sometimes|string|min:8',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'adresse' => 'nullable|string',
-            'ville' => 'nullable|string',
-            'telephone_1' => 'nullable|string',
-            'telephone_2' => 'nullable|string',
-            'fonction_occupee' => 'sometimes|string',
-            'site_web' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(["message" => "Erreur de validation","errors" => $validator->errors()], 422);
-        }
-
-        try {
-            $id = Auth::user()->id;
-            $user = User::findOrFail($id);
-            $association = Association::where('user_id', $id)->firstOrFail();
-
-            $userData = $request->only([
-                'prenom', 'nom','adresse',
-             'ville', 'telephone_1', 'telephone_2'
-            ]);
-
-            if ($request->has('password')) {
-                $userData['password'] = Hash::make($request->password);
-            }
-
-            $user->update($userData);
-
-            $association->update($request->only([
-                'fonction_occupee', 'nom_association', 'sigle_association',
-                'numero_rna_association', 'objet_social', 'site_web',
-                'presentation_association', 'principales_reussites'
-            ]));
-
-            if ($request->hasFile('image')) {
-                if ($user->image) {
-                    Storage::disk('public')->delete($user->image);
-                }
-    
-                $folderName = Str::slug($association->nom_association . '_' . $association->numero_rna_association, '_');
-                $imagePath = $request->file('image')->store("associations/{$folderName}", 'public');
-                $user->update(['image' => $imagePath]);
-            }
-
-
-            return response()->json(["message" => "Association mise à jour avec succès", "user" => $user], 200);
-
-        } catch (\Exception $e) {
-            return response()->json(["message" => "Erreur de mise à jour", "error" => $e->getMessage()], 500);
-        }
-    }
 
 
 
