@@ -161,8 +161,38 @@ class ProfileController extends Controller
         }
     }
 
+    public function updatePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'password' => ['required','string','confirmed',
+            Password::min(8)->mixedCase()->letters()->numbers()->symbols()
+            ],
+        ]);
     
+        if ($validator->fails()) {
+            return response()->json(["message" => "Erreur de validation", "errors" => $validator->errors()], 422);
+        }
     
+        $id = Auth::user()->id;
+        $user = User::findOrFail($id);
+    
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(["message" => "L'ancien mot de passe est incorrect"], 403);
+        }
+        if (Hash::check($request->password, $user->password)) {
+            return response()->json(["message" => "Le nouveau mot de passe ne peut pas être identique à l'ancien"], 422);
+        }
+    
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+    
+        return response()->json(["message" => "Mot de passe mis à jour avec succès"], 200);
+    }
+  
+
+
     
 
 
