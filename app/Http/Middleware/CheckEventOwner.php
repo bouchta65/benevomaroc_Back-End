@@ -2,14 +2,14 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Evenement;
+use App\Models\Opportunite;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 
 
-class CheckEventOwner
+class CheckOpportuniteOwner
 {
     /**
      * Handle an incoming request.
@@ -18,16 +18,16 @@ class CheckEventOwner
      */
     public function handle($request, Closure $next)
 {
-    $event_id = $request->route('id');
+    $opportunite_id = $request->route('id');
     $association = Auth::user()->id;
 
-    $event = Evenement::where('id', $event_id)
+    $opportunite = Opportunite::where('id', $opportunite_id)
                   ->where('association_id', $association)
                   ->first();
 
-    if (!$event) {
+    if (!$opportunite) {
         return response()->json([
-            'message' => 'Vous n\'êtes pas autorisé à accéder à cet événement.'
+            'message' => 'Vous n\'êtes pas autorisé à accéder à cet opportunite.'
         ], 403);
     }
 

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Evenement;
+use App\Models\Opportunite;
 use App\Services\PostulationService;
 
 
-class EventController extends Controller
+class OpportunitesController extends Controller
 {
     protected $postulationService;
 
@@ -16,7 +16,7 @@ class EventController extends Controller
         $this->postulationService = $postulationService;
     }
 
-    public function addEvent(Request $request)
+    public function addOpportunite(Request $request)
     {
         $validated = $request->validate([
             'titre' => 'required|string',
@@ -34,7 +34,7 @@ class EventController extends Controller
         ]);
     
         try {
-            $evenement = Evenement::create([
+            $opportunite = Opportunite::create([
                 'titre' => $validated['titre'],
                 'description' => $validated['description'],
                 'date' => $validated['date'],
@@ -49,7 +49,7 @@ class EventController extends Controller
                 'engagement_requis' => $validated['engagement_requis'],
             ]);
 
-            return response()->json(['message' => 'Événement créé avec succès. En attente d’activation par un administrateur.', 'event' => $evenement], 201);
+            return response()->json(['message' => 'Opportunites créé avec succès. En attente d’activation par un administrateur.', 'opportunite' => $opportunite], 201);
 
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erreur lors de la création de l\'événement', 'error' => $e->getMessage()], 500);
@@ -57,7 +57,7 @@ class EventController extends Controller
     }
 
 
-    public function updateEvent(Request $request, $id)
+    public function updateOpportunite(Request $request, $id)
     {
         $validatedData = $request->validate([
             'titre' => 'sometimes|string|max:255',
@@ -76,58 +76,58 @@ class EventController extends Controller
         ]);
 
         try {
-            $event = Evenement::findOrFail($id);
+            $opportunite = Opportunite::findOrFail($id);
 
-            $event->update($validatedData);
+            $opportunite->update($validatedData);
 
-            return response()->json(['message' => 'Événement mis à jour avec succès', 'event' => $event], 200);
+            return response()->json(['message' => 'Opportunite mis à jour avec succès', 'opportunite' => $opportunite], 200);
 
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Erreur lors de la mise à jour de l\'événement', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Erreur lors de la mise à jour de l\'opportunite', 'error' => $e->getMessage()], 500);
         }
     }
 
-    public function deleteEvent($id)
+    public function deleteOpportunite($id)
     {
         try {
-            $event = Evenement::findOrFail($id);
+            $opportunite = Opportunite::findOrFail($id);
 
-            $event->delete();
+            $opportunite->delete();
 
-            return response()->json(['message' => 'Événement supprimé avec succès'], 200);
+            return response()->json(['message' => 'Opportunite supprimé avec succès'], 200);
 
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Erreur lors de la suppression de l\'événement', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Erreur lors de la suppression de l\'opportunite', 'error' => $e->getMessage()], 500);
         }
     }
 
-    public function getAllEvent()
+    public function getAllOpportunite()
     {
         try {
-            $event = Evenement::All();
+            $opportunite = Opportunite::All();
 
-            return response()->json(['events' => $event], 200);
+            return response()->json(['opportunites' => $opportunite], 200);
 
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Erreur lors de la récupération de l\'événement','error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Erreur lors de la récupération de l\'opportunite','error' => $e->getMessage()], 500);
         }
     }
 
-    public function getEventById($event_id)
+    public function getOpportuniteById($opportunite_id)
     {
         try {
-            $event = Evenement::find($event_id);
+            $opportunite = Opportunite::find($opportunite_id);
 
-            if (!$event) {
-                return response()->json(['message' => 'Événement non trouvé.'], 404);
+            if (!$opportunite) {
+                return response()->json(['message' => 'Opportunite non trouvé.'], 404);
             }
 
-            $status = $this->postulationService->getPostulationStatus($event_id);
+            $status = $this->postulationService->getPostulationStatus($opportunite_id);
 
-            return response()->json(['event' => $event , 'status'=>$status], 200);
+            return response()->json(['opportunite' => $opportunite , 'status'=>$status], 200);
 
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Erreur lors de la récupération de l\'événement','error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Erreur lors de la récupération de l\'opportunite','error' => $e->getMessage()], 500);
         }
     }
 

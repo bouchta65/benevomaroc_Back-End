@@ -18,9 +18,9 @@ class Association extends User
     }
     
 
-    public function evenements()
+    public function opportunitess()
     {
-        return $this->hasMany(Evenement::class);   
+        return $this->hasMany(Opportunite::class);   
     }
     public function postules()
     {

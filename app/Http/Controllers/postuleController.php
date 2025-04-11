@@ -7,36 +7,36 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Postule;
 use App\Models\Benevole;
-use App\Models\Evenement;
+use App\Models\Opportunite;
 
 
 class postuleController extends Controller
 {
 
-    public function hasAlreadyPostulated($event_id){
+    public function hasAlreadyPostulated($opportunite_id){
         $benevole_id = Benevole::where('user_id',Auth::user()->id)->first();
-        $postuled = Postule::where('benevole_id',$benevole_id->id)->where('evenement_id',$event_id)->first();
+        $postuled = Postule::where('benevole_id',$benevole_id->id)->where('opportunite_id',$opportunite_id)->first();
         return $postuled ? true : false;
     }
 
-    public function addPostulation($event_id)
+    public function addPostulation($opportunite_id)
     {
         try {
 
-        $evenement = Evenement::where('id', $event_id)->where('status', 'actif')->first();
+        $opportunite = Opportunite::where('id', $opportunite_id)->where('status', 'actif')->first();
 
-            if (!$evenement) {
-                return response()->json(["message" => "Événement introuvable ou non actif"], 404);
+            if (!$opportunite) {
+                return response()->json(["message" => "Opportunite introuvable ou non actif"], 404);
             }
 
-            if($this->hasAlreadyPostulated($event_id)){
-                return response()->json(["message" => "Vous avez déjà postulé pour cet événement"], 400);
+            if($this->hasAlreadyPostulated($opportunite_id)){
+                return response()->json(["message" => "Vous avez déjà postulé pour cet opportunite"], 400);
             }
             $benevole_id = Benevole::where('user_id',Auth::user()->id)->first();
 
             $postulation =  Postule::create([
                 'benevole_id' => $benevole_id->id,
-                'evenement_id' => $event_id,
+                'opportunite_id' => $opportunite_id,
                 'etat' => 'en attente', 
                 'date' => Carbon::now(), 
             ]);
@@ -47,16 +47,16 @@ class postuleController extends Controller
         }
     }
 
-    public function cancelPostulation($event_id)
+    public function cancelPostulation($opportunite_id)
     {
         try {
             $benevole_id = Benevole::where('user_id', Auth::user()->id)->first();
 
-            $postulation = Postule::where('benevole_id', $benevole_id->id)->where('evenement_id', $event_id)->first();
+            $postulation = Postule::where('benevole_id', $benevole_id->id)->where('opportunite_id', $opportunite_id)->first();
 
             if (!$postulation) {
                 return response()->json([
-                    'message' => 'Aucune postulation trouvée pour ce bénévole et cet événement.'], 404); 
+                    'message' => 'Aucune postulation trouvée pour ce bénévole et cet opportunite.'], 404); 
             }
 
             $postulation->delete();
@@ -70,9 +70,9 @@ class postuleController extends Controller
 
 
 
-    public function postulationByEvent($event_id){
+    public function postulationByOpportunite($opportunite_id){
         try{
-            $postulation = Postule::where('evenement_id',$event_id)->get();
+            $postulation = Postule::where('opportunite_id',$opportunite_id)->get();
             return response()->json(["message" => "Postulations récupérées avec succès. ", "postulation" => $postulation], 201);
 
         }catch(\Exception $e){
@@ -80,17 +80,17 @@ class postuleController extends Controller
         }
     }
 
-    public function changeStatusBnenvole(Request $request, $event_id,$benevole_id)
+    public function changeStatusBnenvole(Request $request, $opportunite_id,$benevole_id)
     {
         try {
             $request->validate([
                 'etat' => 'required|string',
             ]);
     
-            $postulation = Postule::where('benevole_id', $benevole_id)->where('evenement_id',$event_id)->first();
+            $postulation = Postule::where('benevole_id', $benevole_id)->where('opportunite_id',$opportunite_id)->first();
 
             if (!$postulation) {
-                return response()->json(['message' => 'Aucune postulation trouvée pour ce bénévole et cet événement.'], 404);  
+                return response()->json(['message' => 'Aucune postulation trouvée pour ce bénévole et cet opportunite.'], 404);  
             }
     
             $postulation->etat = $request->etat;

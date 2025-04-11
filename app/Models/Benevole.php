@@ -15,9 +15,9 @@ class Benevole extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function evenements()
+    public function opportunitess()
     {
-        return $this->belongsToMany(Evenement::class);   
+        return $this->belongsToMany(Opportunite::class);   
     }
     public function postules()
     {
