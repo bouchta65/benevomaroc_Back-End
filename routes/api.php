@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 Use App\http\Controllers\AuthController;
 use App\Http\Controllers\CategorieController;
-Use App\http\Controllers\EventController;
+Use App\http\Controllers\OpportunitesController;
 use App\Http\Controllers\postuleController;
 use App\Http\Controllers\ProfileController;
 
@@ -13,24 +13,23 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
-    Route::post('/dashboard/evenement',[EventController::class,'addEvent']);
+    Route::post('/dashboard/opportunite',[OpportunitesController::class,'addOpportunite']);
     Route::get('/dashboard/profile', [ProfileController::class, 'getProfile']);
     Route::put('/dashboard/profile/association/userInfo', [ProfileController::class, 'updateUserInfo']);
     Route::put('/dashboard/profile/association/details', [ProfileController::class, 'updateAssociationDetails']);
     Route::put('/dashboard/profile/association/password', [ProfileController::class, 'updatePassword']);
 });
 
-Route::middleware(['auth:sanctum', 'role:association','CheckEventOwner'])->group(function () {
-    Route::put('/dashboard/evenement/{id}',[EventController::class,'updateEvent']);
-    Route::delete('/dashboard/evenement/{id}',[EventController::class,'deleteEvent']);
-    Route::get('/dashboard/evenement/{id}/postulations',[postuleController::class,'postulationByEvent']);
-    Route::put('/dashboard/evenement/{id}/postulations/{benevole_id}', [PostuleController::class, 'changeStatusBnenvole']);
+Route::middleware(['auth:sanctum', 'role:association','CheckOpportuniteOwner'])->group(function () {
+    Route::put('/dashboard/opportunite/{id}',[OpportunitesController::class,'updateOpportunite']);
+    Route::delete('/dashboard/opportunite/{id}',[OpportunitesController::class,'deleteOpportunite']);
+    Route::get('/dashboard/opportunite/{id}/postulations',[postuleController::class,'postulationByOpportunite']);
+    Route::put('/dashboard/opportunite/{id}/postulations/{benevole_id}', [PostuleController::class, 'changeStatusBnenvole']);
 });
 
 Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
-    Route::post('/evenement/{id}', [postuleController::class, 'addPostulation']);
-    Route::delete('/evenement/{id}', [postuleController::class, 'cancelPostulation']);
-    Route::get('/evenement/{id}', [EventController::class, 'getEventById']);
+    Route::post('/opportunite/{id}', [postuleController::class, 'addPostulation']);
+    Route::delete('/opportunite/{id}', [postuleController::class, 'cancelPostulation']);
     Route::get('/mespostulations', [postuleController::class, 'benevolePostulation']);
     Route::get('/profile', [ProfileController::class, 'getProfile']);
     Route::put('/profile/benevole/userInfo', [ProfileController::class, 'updateUserInfo']);
@@ -51,7 +50,12 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 });
 
 
-Route::get('/evenemens', [EventController::class, 'getAllEvent']);
+Route::get('/opportunites', [OpportunitesController::class, 'getAllOpportunite']);
+Route::get('/opportunites/Top', [OpportunitesController::class, 'getTop3Opportunite']);
+Route::get('/opportunites/search', [OpportunitesController::class, 'searchOpportunites']);
+Route::get('/opportunites/type', [OpportunitesController::class, 'filterByTypes']);
+Route::get('/opportunites/populare', [OpportunitesController::class, 'getMostPopularOpportunites']);
+Route::get('/opportunites/recent', [OpportunitesController::class, 'getRecentOpportunites']);
 
 
 
@@ -61,3 +65,8 @@ Route::get('/evenemens', [EventController::class, 'getAllEvent']);
 Route::post('login',[AuthController::class,'login']);
 Route::post('/benevole',[AuthController::class,'registerBenevole']);
 Route::post('/association',[AuthController::class,'registerAssociation']);
+
+
+
+
+Route::get('/opportunites/{id}', [OpportunitesController::class, 'getOpportuniteById']);

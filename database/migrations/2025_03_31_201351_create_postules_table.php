@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('postules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('benevole_id')->constrained('benevoles')->onDelete('cascade');
-            $table->foreignId('evenement_id')->constrained('evenements')->onDelete('cascade');
+            $table->foreignId('opportunite_id')->constrained('opportunites')->onDelete('cascade');
             $table->enum('etat', ['accepté', 'refusé', 'en attente'])->default('en attente'); 
             $table->date('date');
             $table->timestamps();

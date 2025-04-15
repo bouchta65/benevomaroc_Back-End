@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Evenement extends Model
+class Opportunite extends Model
 {
     protected $fillable = [
-        'titre', 'description', 'date', 'derniere_date_postule' ,'ville', 'adresse' , 'association_id' , 'categorie_id' , 'image' , 'status' , 'nb_benevole' , 'duree' , 'engagement_requis'
+        'titre', 'description', 'date', 'derniere_date_postule' ,'ville' , 'pays' , 'adresse' , 'association_id' , 'categorie_id' , 'image' , 'status' , 'nb_benevole' , 'duree' , 'engagement_requis','missions_principales','competences' ,'type'
     ];
 
     public function association()

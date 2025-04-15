@@ -10,8 +10,8 @@ class Categorie extends Model
         'nom' , 'description'
     ];
 
-    public function evenements()
+    public function Opportunite()
     {
-        return $this->hasMany(Evenement::class);   
+        return $this->hasMany(Opportunite::class);   
     }
 }

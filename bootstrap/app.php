@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
-            'CheckEventOwner' => \App\Http\Middleware\CheckEventOwner::class,
+            'CheckOpportuniteOwner' => \App\Http\Middleware\CheckOpportuniteOwner::class,
 
         ]);
     })

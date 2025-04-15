@@ -73,18 +73,23 @@ class ProfileController extends Controller
             if ($user->hasRole('benevole')) {
                 $folderName = Str::slug($user->cin, '_'); 
                 $imagePath = $request->file('image')->store("benevoles/{$folderName}", 'public');
+                $imageUrl = asset('storage/' . $imagePath);
+
 
             } elseif ($user->hasRole('association')) {
                 $association = Association::where('user_id', $user->id)->first(); 
                 $folderName = Str::slug($association->nom_association . '_' . $association->numero_rna_association, '_');
                 $imagePath = $request->file('image')->store("associations/{$folderName}", 'public');
+                $imageUrl = asset('storage/' . $imagePath);
 
             } elseif ($user->hasRole('admin')) {
                 $folderName = 'admin_' . Str::slug($user->cin, '_'); 
                 $imagePath = $request->file('image')->store("admins/{$folderName}", 'public');
+                $imageUrl = asset('storage/' . $imagePath);
+
             }
 
-            $user->update(['image' => $imagePath]);
+            $user->update(['image' => $imageUrl]);
         }
 
         return response()->json(["message" => "Profil mis à jour avec succès", "user" => $user], 200);
@@ -123,7 +128,9 @@ class ProfileController extends Controller
 
             $folderName = Str::slug($user->cin, '_');
             $cvPath = $request->file('cv')->store("benevoles/{$folderName}", 'public');
-            $benevole->update(['cv' => $cvPath]);
+            $cvUrl = asset('storage/' . $cvPath);
+
+            $benevole->update(['cv' => $cvUrl]);
         }
 
         return response()->json(["message" => "Informations bénévoles mises à jour avec succès", "benevole" => $benevole], 200);

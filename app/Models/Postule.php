@@ -7,15 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Postule extends Model
 {
     protected $fillable = [
-        'benevole_id', 'evenement_id', 'etat' , 'date'
+        'benevole_id', 'opportunite_id', 'etat' , 'date'
     ];
 
     public function benevole()
     {
         return $this->belongsTo(Benevole::class);   
     }
-    public function evenement()
+    public function Opportunite()
     {
-        return $this->belongsTo(Evenement::class);   
+        return $this->belongsTo(Opportunite::class);   
     }
 }

@@ -50,7 +50,10 @@ class AuthController extends Controller
             $folderName = Str::slug($request->cin, '_');
 
             $imagePath = $request->file('image')->store("benevoles/{$folderName}", 'public');
+            $imageUrl = asset('storage/' . $imagePath);
+
             $cvPath = $request->hasFile('cv') ? $request->file('cv')->store("benevoles/{$folderName}", 'public') : null;
+            $cvUrl = asset('storage/' . $cvPath);
 
             $user = User::create([
                 'civilite' => $request->civilite,
@@ -58,7 +61,7 @@ class AuthController extends Controller
                 'nom' => $request->nom,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'image' => $imagePath,
+                'image' => $imageUrl,
                 'cin' => $request->cin,
                 'adresse' => $request->adresse,
                 'date_naissance' => $request->date_naissance,
@@ -77,7 +80,7 @@ class AuthController extends Controller
                 'talents' => $request->talents,
                 'niveau_etudes' => $request->niveau_etudes,
                 'metier' => $request->metier,
-                'cv' => $cvPath,
+                'cv' => $cvUrl,
             ]);
     
         
@@ -124,16 +127,16 @@ class AuthController extends Controller
             $folderName = Str::slug($request->nom_association . '_' . $request->numero_rna_association, '_');
 
             $imagePath = $request->file('image')->store("associations/{$folderName}", 'public');
-        
+            $imageUrl = asset('storage/' . $imagePath);
             $logoPath = $request->file('logo')->store("associations/{$folderName}", 'public');
-    
+            $logoUrl = asset('storage/' . $logoPath);
             $user = User::create([
                 'civilite' => $request->civilite,
                 'prenom' => $request->prenom,
                 'nom' => $request->nom,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'image' => $imagePath,
+                'image' => $imageUrl,
                 'cin' => $request->cin,
                 'adresse' => $request->adresse,
                 'date_naissance' => $request->date_naissance,
@@ -151,7 +154,7 @@ class AuthController extends Controller
                 'numero_rna_association' => $request->numero_rna_association,
                 'objet_social' => $request->objet_social,
                 'site_web' => $request->site_web,
-                'logo' => $logoPath,
+                'logo' => $logoUrl,
                 'presentation_association' => $request->presentation_association,
                 'principales_reussites' => $request->principales_reussites,
             ]);
