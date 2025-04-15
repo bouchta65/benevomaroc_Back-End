@@ -30,7 +30,6 @@ Route::middleware(['auth:sanctum', 'role:association','CheckOpportuniteOwner'])-
 Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
     Route::post('/opportunite/{id}', [postuleController::class, 'addPostulation']);
     Route::delete('/opportunite/{id}', [postuleController::class, 'cancelPostulation']);
-    Route::get('/opportunite/{id}', [OpportunitesController::class, 'getOpportuniteById']);
     Route::get('/mespostulations', [postuleController::class, 'benevolePostulation']);
     Route::get('/profile', [ProfileController::class, 'getProfile']);
     Route::put('/profile/benevole/userInfo', [ProfileController::class, 'updateUserInfo']);
@@ -52,6 +51,11 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 
 
 Route::get('/opportunites', [OpportunitesController::class, 'getAllOpportunite']);
+Route::get('/opportunites/Top', [OpportunitesController::class, 'getTop3Opportunite']);
+Route::get('/opportunites/search', [OpportunitesController::class, 'searchOpportunites']);
+Route::get('/opportunites/type', [OpportunitesController::class, 'filterByTypes']);
+Route::get('/opportunites/populare', [OpportunitesController::class, 'getMostPopularOpportunites']);
+Route::get('/opportunites/recent', [OpportunitesController::class, 'getRecentOpportunites']);
 
 
 
@@ -61,3 +65,8 @@ Route::get('/opportunites', [OpportunitesController::class, 'getAllOpportunite']
 Route::post('login',[AuthController::class,'login']);
 Route::post('/benevole',[AuthController::class,'registerBenevole']);
 Route::post('/association',[AuthController::class,'registerAssociation']);
+
+
+
+
+Route::get('/opportunites/{id}', [OpportunitesController::class, 'getOpportuniteById']);
