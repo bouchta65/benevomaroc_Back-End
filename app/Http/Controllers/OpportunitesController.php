@@ -201,6 +201,26 @@ class OpportunitesController extends Controller
         }
     }
 
-   
+    public function filterByTypes(Request $request)
+    {
+        try {
+            $types = $request->input('types');
+            $perPage = $request->input('per_page', 9);
+
+            $opportunites = Opportunite::withCount('postules')
+                ->when($types, function ($query, $types) {
+                    return $query->whereIn('type', $types);
+                })
+                ->paginate($perPage);
+
+            return response()->json($opportunites, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors du filtrage par types.','error' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+  
 }
 
