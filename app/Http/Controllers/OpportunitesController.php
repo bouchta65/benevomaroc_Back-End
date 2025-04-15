@@ -219,6 +219,28 @@ class OpportunitesController extends Controller
         }
     }
 
+    public function getMostPopularOpportunites()
+    {
+        try {
+            $popularOpportunites = Opportunite::withCount('postules')->orderByDesc('postules_count')->paginate(10); 
+
+            return response()->json($popularOpportunites, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la récupération des opportunités populaires.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getRecentOpportunites()
+    {
+        try {
+            $recentOpportunites = Opportunite::withCount('postules')->orderByDesc('created_at')
+                ->paginate(10); 
+
+            return response()->json($recentOpportunites, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la récupération des opportunités récentes.', 'error' => $e->getMessage()], 500);
+        }
+    }
 
 
   
