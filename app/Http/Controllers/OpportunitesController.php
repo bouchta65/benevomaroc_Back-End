@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Association;
 use Illuminate\Http\Request;
 use App\Models\Opportunite;
+use Illuminate\Support\Facades\Validator;
 use App\Services\PostulationService;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+
+
 
 
 class OpportunitesController extends Controller
@@ -18,7 +24,7 @@ class OpportunitesController extends Controller
 
     public function addOpportunite(Request $request)
     {
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'titre' => 'required|string',
             'description' => 'required|string',
             'date' => 'required|date',
@@ -27,26 +33,45 @@ class OpportunitesController extends Controller
             'adresse' => 'required|string',
             'association_id' => 'required|integer',
             'categorie_id' => 'required|integer',
-            'image' => 'nullable|string',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'nb_benevole' => 'required|integer',
-            'duree' => 'nullable|string',
-            'engagement_requis' => 'nullable|string',
+            'duree' => 'required|string',
+            'engagement_requis' => 'required|string',
+            'missions_principales' => 'required|string',
+            'competences' => 'required|string',
+            'pays' => 'required|string',
+            'type' => 'required|string',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => "Erreur de validation","errors" => $validator->errors()], 422);
+        }
     
         try {
+            $user = Auth::user()->id;
+            $association =  Association::where('user_id',$user)->first();
+
+            $folderName = Str::slug($association->nom_association . '_' . $association->numero_rna_association, '_');
+            $imagePath = $request->file('image')->store("associations/{$folderName}/opportunites", 'public');
+            $imageUrl = asset('storage/' . $imagePath);
+
             $opportunite = Opportunite::create([
-                'titre' => $validated['titre'],
-                'description' => $validated['description'],
-                'date' => $validated['date'],
-                'derniere_date_postule' => $validated['derniere_date_postule'],
-                'ville' => $validated['ville'],
-                'adresse' => $validated['adresse'],
-                'association_id' => $validated['association_id'],
-                'categorie_id' => $validated['categorie_id'],
-                'image' => $validated['image'],
-                'nb_benevole' => $validated['nb_benevole'],
-                'duree' => $validated['duree'],
-                'engagement_requis' => $validated['engagement_requis'],
+                'titre' => $request->titre, 
+                'description' => $request->description,
+                'date' => $request->date,
+                'derniere_date_postule' => $request->derniere_date_postule,
+                'ville' => $request->ville,
+                'adresse' => $request->adresse,
+                'association_id' => $request->association_id,
+                'categorie_id' => $request->categorie_id,
+                'image' => $imageUrl,
+                'nb_benevole' => $request->nb_benevole,
+                'duree' => $request->duree,
+                'engagement_requis' => $request->engagement_requis,
+                'missions_principales' => $request->missions_principales,
+                'competences' => $request->competences,
+                'pays' => $request->pays,
+                'type' => $request->type,
             ]);
 
             return response()->json(['message' => 'Opportunites créé avec succès. En attente d’activation par un administrateur.', 'opportunite' => $opportunite], 201);
@@ -68,16 +93,27 @@ class OpportunitesController extends Controller
             'adress' => 'sometimes|string',
             'association_id' => 'sometimes|exists:associations,id',
             'categorie_id' => 'sometimes|exists:categories,id',
-            'image' => 'nullable|string',
-            'status' => 'sometimes|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'nb_benevole' => 'sometimes|integer',
             'duree' => 'sometimes|string',
             'engagement_requis' => 'sometimes|string',
+            'missions_principales' => 'nullable|string',
+            'competences' => 'nullable|string',
+            'pays' => 'nullable|string',
+            'type' => 'nullable|string',
         ]);
 
         try {
             $opportunite = Opportunite::findOrFail($id);
 
+            if ($request->hasFile('image')) {
+                $association = Auth::user();
+                $folderName = Str::slug($association->nom_association . '_' . $association->numero_rna_association, '_');
+                $imagePath = $request->file('image')->store("associations/{$folderName}/opportunites", 'public');
+                
+                $opportunite->image = $imagePath;
+                $opportunite->save(); 
+            }
             $opportunite->update($validatedData);
 
             return response()->json(['message' => 'Opportunite mis à jour avec succès', 'opportunite' => $opportunite], 200);
@@ -101,13 +137,13 @@ class OpportunitesController extends Controller
         }
     }
 
-    public function getAllOpportunite()
+    public function getAllOpportunite(Request $request)
     {
         try {
-            $opportunite = Opportunite::All();
-
-            return response()->json(['opportunites' => $opportunite], 200);
-
+            $perPage = $request->input('per_page', 9);
+            $opportunites = Opportunite::withCount('postules')->orderByDesc('created_at')->paginate($perPage);
+    
+            return response()->json($opportunites, 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erreur lors de la récupération de l\'opportunite','error' => $e->getMessage()], 500);
         }
@@ -116,7 +152,8 @@ class OpportunitesController extends Controller
     public function getOpportuniteById($opportunite_id)
     {
         try {
-            $opportunite = Opportunite::find($opportunite_id);
+            $opportunite = Opportunite::with('association')->withCount('postules')->find($opportunite_id);
+
 
             if (!$opportunite) {
                 return response()->json(['message' => 'Opportunite non trouvé.'], 404);
@@ -131,9 +168,39 @@ class OpportunitesController extends Controller
         }
     }
 
+    public function getTop3Opportunite()
+    {
+        try {
+            $topOpportunites = Opportunite::withCount('postules')->orderByDesc('postules_count')->take(3)->get();
+            
+            return response()->json(['top_opportunites' => $topOpportunites], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la récupération des top opportunités','error' => $e->getMessage() ], 500);
+        }
+    }
 
+    public function searchOpportunites(Request $request)
+    {
+        try {
+            $perPage = $request->input('per_page', 9);
+            $query = Opportunite::withCount('postules');
 
+            if ($request->has('ville') && $request->ville !== null) {
+                $query->where('ville', 'like', '%' . $request->ville . '%');
+            }
 
+            if ($request->has('titre') && $request->titre !== null) {
+                $query->where('titre', 'like', '%' . $request->titre . '%');
+            }
 
+            $opportunites = $query->paginate($perPage);
 
+            return response()->json($opportunites, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la recherche des opportunités','error' => $e->getMessage()], 500);
+        }
+    }
+
+   
 }
+
