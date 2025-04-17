@@ -242,6 +242,24 @@ class OpportunitesController extends Controller
         }
     }
 
+    public function getSimilarOpportunites($id)
+    {
+        try {
+            $opportunity = Opportunite::find($id);
+
+            if (!$opportunity) {
+                return response()->json(['message' => 'Opportunité non trouvée.'], 404);
+            }   
+
+            $similarOpportunites = Opportunite::where('categorie_id', $opportunity->categorie_id)->where('id', '!=', $id) ->orderByDesc('created_at')->limit(2)->get();
+
+            return response()->json($similarOpportunites, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la récupération des opportunités similaires.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
 
   
 }
