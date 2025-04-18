@@ -179,6 +179,7 @@ class OpportunitesController extends Controller
         }
     }
 
+
     public function searchOpportunites(Request $request)
     {
         try {
@@ -193,52 +194,29 @@ class OpportunitesController extends Controller
                 $query->where('titre', 'like', '%' . $request->titre . '%');
             }
 
+            if ($request->has('types') && is_array($request->types) && count($request->types) > 0) {
+                $query->whereIn('type', $request->types);
+            }
+
+            if ($request->has('sort')) {
+                switch ($request->sort) {
+                    case 'recent':
+                        $query->orderBy('created_at', 'desc');
+                        break;
+                    case 'popular':
+                        $query->orderBy('postules_count', 'desc');
+                        break;
+                }
+            }
+
             $opportunites = $query->paginate($perPage);
 
             return response()->json($opportunites, 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Erreur lors de la recherche des opportunités','error' => $e->getMessage()], 500);
-        }
-    }
-
-    public function filterByTypes(Request $request)
-    {
-        try {
-            $types = $request->input('types');
-            $perPage = $request->input('per_page', 9);
-
-            $opportunites = Opportunite::withCount('postules')
-                ->when($types, function ($query, $types) {
-                    return $query->whereIn('type', $types);
-                })
-                ->paginate($perPage);
-
-            return response()->json($opportunites, 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Erreur lors du filtrage par types.','error' => $e->getMessage()], 500);
-        }
-    }
-
-    public function getMostPopularOpportunites()
-    {
-        try {
-            $popularOpportunites = Opportunite::withCount('postules')->orderByDesc('postules_count')->paginate(10); 
-
-            return response()->json($popularOpportunites, 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Erreur lors de la récupération des opportunités populaires.', 'error' => $e->getMessage()], 500);
-        }
-    }
-
-    public function getRecentOpportunites()
-    {
-        try {
-            $recentOpportunites = Opportunite::withCount('postules')->orderByDesc('created_at')
-                ->paginate(10); 
-
-            return response()->json($recentOpportunites, 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Erreur lors de la récupération des opportunités récentes.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Erreur lors de la recherche des opportunités',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
