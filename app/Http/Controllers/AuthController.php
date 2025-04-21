@@ -18,43 +18,51 @@ class AuthController extends Controller
   
     public function registerBenevole(Request $request)
     {
+    
         $validator = Validator::make($request->all(), [
             'civilite' => 'required|string',
             'prenom' => 'required|string',
             'nom' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => ['required','string','confirmed',
-            Password::min(8)->mixedCase()->letters()->numbers()->symbols()],
+            'email' => 'required|string|email',
+            'password' => [
+                'required', 'string', 'confirmed',
+                Password::min(8)->mixedCase()->letters()->numbers()->symbols()
+            ],
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'cin' => 'required|string|unique:users',
+            'cin' => 'required|string',
             'adresse' => 'required|string',
             'date_naissance' => 'required|date',
             'ville' => 'required|string',
             'telephone_1' => 'required|string',
             'telephone_2' => 'nullable|string',
-            'domaines_action' => 'required|string',
-            'types_mission' => 'required|string',
-            'disponibilites' => 'required|string',
-            'missions_preferrees' => 'required|string',
+            'domaines_action' => 'nullable|array',
+            'types_mission' => 'nullable|string',
+            'disponibilites' => 'nullable|string',
+            'missions_preferrees' => 'nullable|array',
             'talents' => 'nullable|string',
             'niveau_etudes' => 'nullable|string',
             'metier' => 'nullable|string',
-            'cv' => 'nullable|file|mimes:pdf|max:2048',
+            'cv' => 'sometimes|nullable|file|mimes:pdf|max:2048',
         ]);
+    
         if ($validator->fails()) {
-            return response()->json(["message" => "Erreur de validation","errors" => $validator->errors()], 422);
+            return response()->json([
+                "message" => "Erreur de validation",
+                "errors" => $validator->errors()
+            ], 422);
         }
-
+    
         try {
-
             $folderName = Str::slug($request->cin, '_');
-
+    
             $imagePath = $request->file('image')->store("benevoles/{$folderName}", 'public');
             $imageUrl = asset('storage/' . $imagePath);
-
-            $cvPath = $request->hasFile('cv') ? $request->file('cv')->store("benevoles/{$folderName}", 'public') : null;
-            $cvUrl = asset('storage/' . $cvPath);
-
+    
+            $cvPath = $request->hasFile('cv') 
+                ? $request->file('cv')->store("benevoles/{$folderName}", 'public') 
+                : null;
+            $cvUrl = $cvPath ? asset('storage/' . $cvPath) : null;
+    
             $user = User::create([
                 'civilite' => $request->civilite,
                 'prenom' => $request->prenom,
@@ -73,33 +81,47 @@ class AuthController extends Controller
     
             Benevole::create([
                 'user_id' => $user->id,
-                'domaines_action' => $request->domaines_action,
+                'domaines_action' => json_encode($request->domaines_action),
                 'types_mission' => $request->types_mission,
                 'disponibilites' => $request->disponibilites,
-                'missions_preferrees' => $request->missions_preferrees,
+                'missions_preferrees' => json_encode($request->missions_preferrees),
                 'talents' => $request->talents,
                 'niveau_etudes' => $request->niveau_etudes,
                 'metier' => $request->metier,
                 'cv' => $cvUrl,
             ]);
     
-        
-            return response()->json(["message" => "Bénévole inscrit avec succès", "user" => $user], 201);
+            return response()->json([
+                "message" => "Bénévole inscrit avec succès", 
+                "user" => $user
+            ], 201);
     
         } catch (\Exception $e) {
-            return response()->json(["message" => "Erreur d'inscription", "error" => $e->getMessage()], 500);
+            if (isset($user)) {
+                $user->delete();
+            }
+            return response()->json([
+                "message" => "Erreur d'inscription", 
+                "error" => $e->getMessage()
+            ], 500);
         }
     }
+    
     
 
     public function registerAssociation(Request $request)
     {
+
+
         $validator = Validator::make($request->all(), [
             'civilite' => 'required|string',
             'prenom' => 'required|string',
             'nom' => 'required|string',
             'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => [
+                'required', 'string', 'confirmed',
+                Password::min(8)->mixedCase()->letters()->numbers()->symbols()
+            ],
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'cin' => 'required|string|unique:users',
             'adresse' => 'required|string',
@@ -107,15 +129,16 @@ class AuthController extends Controller
             'ville' => 'required|string',
             'telephone_1' => 'required|string',
             'telephone_2' => 'nullable|string',
-            'fonction_occupee' => 'required|string',
             'nom_association' => 'required|string',
             'sigle_association' => 'required|string',
-            'numero_rna_association' => 'required|string',
+            'numero_rna_association' => 'required|string|unique:associations',
             'objet_social' => 'required|string',
             'site_web' => 'nullable|string',
+            'facebook' => 'nullable|string',
+            'instagram' => 'nullable|string',
             'logo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'presentation_association' => 'nullable|string',
-            'principales_reussites' => 'nullable|string',
+            'carte_nationale' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'status_association' => 'required|file|mimes:pdf|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -128,8 +151,16 @@ class AuthController extends Controller
 
             $imagePath = $request->file('image')->store("associations/{$folderName}", 'public');
             $imageUrl = asset('storage/' . $imagePath);
+
+            $statusPath = $request->file('status_association')->store("associations/{$folderName}", 'public');
+            $statusUrl = asset('storage/' . $statusPath);
+
+            $cartePath = $request->file('carte_nationale')->store("associations/{$folderName}", 'public');
+            $carteUrl = asset('storage/' . $cartePath);
+
             $logoPath = $request->file('logo')->store("associations/{$folderName}", 'public');
             $logoUrl = asset('storage/' . $logoPath);
+
             $user = User::create([
                 'civilite' => $request->civilite,
                 'prenom' => $request->prenom,
@@ -148,24 +179,27 @@ class AuthController extends Controller
     
             Association::create([
                 'user_id' => $user->id,
-                'fonction_occupee' => $request->fonction_occupee,
                 'nom_association' => $request->nom_association,
                 'sigle_association' => $request->sigle_association,
                 'numero_rna_association' => $request->numero_rna_association,
                 'objet_social' => $request->objet_social,
                 'site_web' => $request->site_web,
+                'instagram' => $request->instagram,
+                'facebook' => $request->facebook,
                 'logo' => $logoUrl,
-                'presentation_association' => $request->presentation_association,
-                'principales_reussites' => $request->principales_reussites,
+                'status_association' => $statusUrl,
+                'carte_nationale' => $carteUrl,
             ]);
         
             return response()->json(["message" => "Association inscrit avec succès", "user" => $user], 201);
     
         } catch (\Exception $e) {
+            if (isset($user)) {
+                $user->delete();
+            }
             return response()->json(["message" => "Erreur d'inscription", "error" => $e->getMessage()], 500);
         }
 
-    
     }
 
 
