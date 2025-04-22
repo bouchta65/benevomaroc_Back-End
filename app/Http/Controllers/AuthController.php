@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -217,9 +218,10 @@ class AuthController extends Controller
                 return response()->json(["message" => "Email or password is incorrect"], 401);
             }
 
-            $token = $user->createToken("AuthSanctum", ["*"], now()->addMinutes(10000))->plainTextToken;
+            $user->tokens()->delete();
+            $token = $user->createToken("AuthSanctum", ["*"], now()->addHours(4))->plainTextToken;
 
-            return response()->json(["message" => "User successfully logged in", "token" => $token], 200);
+            return response()->json(["message" => "User successfully logged in", "token" => $token,"user" => $user], 200);
         } catch (\Exception $e) {
             return response()->json(["message" => "Error", "error" => $e->getMessage()], 500);
         }
@@ -235,6 +237,29 @@ class AuthController extends Controller
             
         } catch (\Exception $e) {
             return response()->json(["message"=>"error","error"=>$e->getMessage()],500);
+        }
+    }
+
+    public function authStatus(Request $request)
+    {
+        try {
+         
+            if (Auth::check()) {
+                return response()->json([
+                    'authenticated' => true,
+                    'user' => $request->user() 
+                ], 200);
+            }
+
+            return response()->json([
+                'authenticated' => false,
+                'message' => 'User is not authenticated.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while checking authentication status.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
