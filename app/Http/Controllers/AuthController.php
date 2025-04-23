@@ -24,13 +24,13 @@ class AuthController extends Controller
             'civilite' => 'required|string',
             'prenom' => 'required|string',
             'nom' => 'required|string',
-            'email' => 'required|string|email',
+            'email' => 'required|string|email|unique:users',
             'password' => [
                 'required', 'string', 'confirmed',
                 Password::min(8)->mixedCase()->letters()->numbers()->symbols()
             ],
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'cin' => 'required|string',
+            'cin' => 'required|string|unique:users',
             'adresse' => 'required|string',
             'date_naissance' => 'required|date',
             'ville' => 'required|string',
@@ -44,13 +44,13 @@ class AuthController extends Controller
             'niveau_etudes' => 'nullable|string',
             'metier' => 'nullable|string',
             'cv' => 'sometimes|nullable|file|mimes:pdf|max:2048',
-        ]);
+        ],[
+            'email.unique' => 'Cette adresse email est déjà utilisée.',
+            'cin.unique' => 'Ce numéro de CIN est déjà utilisé.',
+        ]);;
     
         if ($validator->fails()) {
-            return response()->json([
-                "message" => "Erreur de validation",
-                "errors" => $validator->errors()
-            ], 422);
+            return response()->json(["message" => "Erreur de validation","errors" => $validator->errors()], 422);
         }
     
         try {
@@ -92,19 +92,13 @@ class AuthController extends Controller
                 'cv' => $cvUrl,
             ]);
     
-            return response()->json([
-                "message" => "Bénévole inscrit avec succès", 
-                "user" => $user
-            ], 201);
+            return response()->json(["message" => "Bénévole inscrit avec succès", "user" => $user], 201);
     
         } catch (\Exception $e) {
             if (isset($user)) {
                 $user->delete();
             }
-            return response()->json([
-                "message" => "Erreur d'inscription", 
-                "error" => $e->getMessage()
-            ], 500);
+            return response()->json(["message" => "Erreur d'inscription", "error" => $e->getMessage()], 500);
         }
     }
     
@@ -140,6 +134,10 @@ class AuthController extends Controller
             'logo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'carte_nationale' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'status_association' => 'required|file|mimes:pdf|max:2048',
+        ],[
+            'email.unique' => 'Cette adresse email est déjà utilisée.',
+            'cin.unique' => 'Ce numéro de CIN est déjà utilisé.',
+            'numero_rna_association.unique' => 'Ce numéro RNA est déjà enregistré.',
         ]);
 
         if ($validator->fails()) {
