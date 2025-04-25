@@ -119,5 +119,31 @@ class postuleController extends Controller
             return response()->json(['message' => 'Erreur lors de la récupération des postulations', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function top3Opportunites()
+    {
+        try {
+            $benevole = Benevole::where('user_id', Auth::id())->first();
+
+            if (!$benevole) {
+                return response()->json(['message' => 'Bénévole non trouvé.'], 404);
+            }
+
+            $opportunites = Postule::with('opportunite') 
+                ->where('benevole_id', $benevole->id)
+                ->where('etat', 'accepté')
+                ->orderBy('date', 'desc')
+                ->take(3)
+                ->get()
+                ->map(function ($postule) {
+                    return $postule->opportunite; 
+                });
+
+            return response()->json(['opportunites' => $opportunites], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la récupération des opportunités', 'error' => $e->getMessage()], 500);
+        }
+    }
+  
     
 }
