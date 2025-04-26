@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Services\PostulationService;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+
 
 
 
@@ -31,7 +33,6 @@ class OpportunitesController extends Controller
             'derniere_date_postule' => 'required|date',
             'ville' => 'required|string',
             'adresse' => 'required|string',
-            'association_id' => 'required|integer',
             'categorie_id' => 'required|integer',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'nb_benevole' => 'required|integer',
@@ -62,7 +63,7 @@ class OpportunitesController extends Controller
                 'derniere_date_postule' => $request->derniere_date_postule,
                 'ville' => $request->ville,
                 'adresse' => $request->adresse,
-                'association_id' => $request->association_id,
+                'association_id' => $association->id,
                 'categorie_id' => $request->categorie_id,
                 'image' => $imageUrl,
                 'nb_benevole' => $request->nb_benevole,
@@ -81,17 +82,15 @@ class OpportunitesController extends Controller
         }
     }
 
-
     public function updateOpportunite(Request $request, $id)
     {
-        $validatedData = $request->validate([
+        $validator = Validator::make($request->all(), [
             'titre' => 'sometimes|string|max:255',
             'description' => 'sometimes|string',
             'date' => 'sometimes|date',
             'derniere_date_postule' => 'sometimes|date',
             'ville' => 'sometimes|string',
             'adress' => 'sometimes|string',
-            'association_id' => 'sometimes|exists:associations,id',
             'categorie_id' => 'sometimes|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'nb_benevole' => 'sometimes|integer',
@@ -102,22 +101,40 @@ class OpportunitesController extends Controller
             'pays' => 'nullable|string',
             'type' => 'nullable|string',
         ]);
-
+        if ($validator->fails()) {
+            return response()->json(["message" => "Erreur de validation", "errors" => $validator->errors()], 422);
+        }
         try {
             $opportunite = Opportunite::findOrFail($id);
-
+            $user = Auth::user()->id;
+            $association = Association::where('user_id', $user)->first();
+                    
+            $opportunite->update($request->only([
+                'titre', 'description', 'date','duree','engagement_requis',
+                'missions_principales','competences','pays','type',
+                'derniere_date_postule', 'ville', 'categorie_id', 'nb_benevole'
+            ]));
+        
             if ($request->hasFile('image')) {
-                $association = Auth::user();
+                if ($opportunite->image) {
+                    $oldPath = str_replace(asset('storage/'), '', $opportunite->image);
+                    $oldPath = ltrim($oldPath, '/');
+                    
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
+        
                 $folderName = Str::slug($association->nom_association . '_' . $association->numero_rna_association, '_');
                 $imagePath = $request->file('image')->store("associations/{$folderName}/opportunites", 'public');
-                
-                $opportunite->image = $imagePath;
-                $opportunite->save(); 
-            }
-            $opportunite->update($validatedData);
+                $imageUrl = asset('storage/' . $imagePath);
+        
+                $opportunite->update(['image' => $imageUrl]);
 
+                }
+    
             return response()->json(['message' => 'Opportunite mis à jour avec succès', 'opportunite' => $opportunite], 200);
-
+    
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erreur lors de la mise à jour de l\'opportunite', 'error' => $e->getMessage()], 500);
         }
@@ -236,6 +253,29 @@ class OpportunitesController extends Controller
             return response()->json(['message' => 'Erreur lors de la récupération des opportunités similaires.', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function getOpportunitesByAssociation(Request $request)
+    {
+        try {
+            $association = Association::where('user_id', Auth::id())->first();
+            $perPage = $request->input('per_page', 9);
+    
+            $opportunites = Opportunite::with(['categorie:id,nom']) 
+                ->withCount('postules')
+                ->where('association_id', $association->id)
+                ->orderByDesc('created_at')
+                ->paginate($perPage);
+    
+            return response()->json($opportunites, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération des opportunités de l\'association',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+
 
 
 
