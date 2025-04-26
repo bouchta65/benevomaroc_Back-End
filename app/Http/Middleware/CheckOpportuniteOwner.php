@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Opportunite;
+use App\Models\Association;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,10 +20,11 @@ class CheckOpportuniteOwner
     public function handle($request, Closure $next)
 {
     $opportunite_id = $request->route('id');
-    $association = Auth::user()->id;
+    $user = Auth::user()->id;
+    $association =  Association::where('user_id',$user)->first();
 
     $opportunite = Opportunite::where('id', $opportunite_id)
-                  ->where('association_id', $association)
+                  ->where('association_id', $association->id)
                   ->first();
 
     if (!$opportunite) {
