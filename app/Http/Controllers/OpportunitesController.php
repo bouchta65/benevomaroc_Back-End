@@ -41,7 +41,6 @@ class OpportunitesController extends Controller
             'missions_principales' => 'required|string',
             'competences' => 'required|string',
             'pays' => 'required|string',
-            'type' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -72,7 +71,6 @@ class OpportunitesController extends Controller
                 'missions_principales' => $request->missions_principales,
                 'competences' => $request->competences,
                 'pays' => $request->pays,
-                'type' => $request->type,
             ]);
 
             return response()->json(['message' => 'Opportunites créé avec succès. En attente d’activation par un administrateur.', 'opportunite' => $opportunite], 201);
