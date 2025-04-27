@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('benevoles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('domaines_action');
-            $table->string('types_mission');
-            $table->string('disponibilites');
-            $table->text('missions_preferrees');
+            $table->json('domaines_action');
+            $table->string('types_mission')->nullable();
+            $table->string('disponibilites')->nullable();
+            $table->json('missions_preferrees')->nullable();
             $table->text('talents')->nullable();
             $table->string('niveau_etudes')->nullable();
             $table->string('metier')->nullable();

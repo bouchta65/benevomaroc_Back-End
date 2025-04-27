@@ -14,15 +14,16 @@ return new class extends Migration
         Schema::create('associations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('fonction_occupee');
             $table->string('nom_association');
             $table->string('sigle_association');
             $table->string('numero_rna_association')->unique();
             $table->text('objet_social');
             $table->string('site_web')->nullable();
+            $table->string('facebook')->nullable();
+            $table->string('instagram')->nullable();
             $table->string('logo');
-            $table->text('presentation_association')->nullable();
-            $table->text('principales_reussites')->nullable();
+            $table->string('status_association');
+            $table->string('carte_nationale');
             $table->timestamps();
         });
     }
