@@ -156,7 +156,7 @@ class OpportunitesController extends Controller
     {
         try {
             $perPage = $request->input('per_page', 9);
-            $opportunites = Opportunite::withCount('postules')->orderByDesc('created_at')->paginate($perPage);
+            $opportunites = Opportunite::with('categorie')->withCount('postules')->orderByDesc('created_at')->paginate($perPage);
     
             return response()->json($opportunites, 200);
         } catch (\Exception $e) {
@@ -167,7 +167,7 @@ class OpportunitesController extends Controller
     public function getOpportuniteById($opportunite_id)
     {
         try {
-            $opportunite = Opportunite::with('association')->withCount('postules')->find($opportunite_id);
+            $opportunite = Opportunite::with('categorie')->with('association')->withCount('postules')->find($opportunite_id);
 
 
             if (!$opportunite) {
@@ -199,7 +199,7 @@ class OpportunitesController extends Controller
     {
         try {
             $perPage = $request->input('per_page', 9);
-            $query = Opportunite::withCount('postules');
+            $query = Opportunite::with('categorie')->withCount('postules');
 
             if ($request->has('ville') && $request->ville !== null) {
                 $query->where('ville', 'like', '%' . $request->ville . '%');
@@ -210,8 +210,12 @@ class OpportunitesController extends Controller
             }
 
             if ($request->has('types') && is_array($request->types) && count($request->types) > 0) {
-                $query->whereIn('type', $request->types);
+                $query->whereHas('categorie', function($q) use ($request) {
+                    $q->whereIn('nom', $request->types);
+                });
             }
+
+      
 
             if ($request->has('sort')) {
                 switch ($request->sort) {
