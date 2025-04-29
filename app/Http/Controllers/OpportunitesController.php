@@ -83,17 +83,17 @@ class OpportunitesController extends Controller
     public function updateOpportunite(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'titre' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string',
-            'date' => 'sometimes|date',
-            'derniere_date_postule' => 'sometimes|date',
-            'ville' => 'sometimes|string',
-            'adress' => 'sometimes|string',
-            'categorie_id' => 'sometimes|exists:categories,id',
+            'titre' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'date' => 'nullable|date',
+            'derniere_date_postule' => 'nullable|date',
+            'ville' => 'nullable|string',
+            'adress' => 'nullable|string',
+            'categorie_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'nb_benevole' => 'sometimes|integer',
-            'duree' => 'sometimes|string',
-            'engagement_requis' => 'sometimes|string',
+            'nb_benevole' => 'nullable|integer',
+            'duree' => 'nullable|string',
+            'engagement_requis' => 'nullable|string',
             'missions_principales' => 'nullable|string',
             'competences' => 'nullable|string',
             'pays' => 'nullable|string',
@@ -110,7 +110,7 @@ class OpportunitesController extends Controller
             $opportunite->update($request->only([
                 'titre', 'description', 'date','duree','engagement_requis',
                 'missions_principales','competences','pays','type',
-                'derniere_date_postule', 'ville', 'categorie_id', 'nb_benevole'
+                'derniere_date_postule', 'ville', 'categorie_id', 'nb_benevole', 'adress'
             ]));
         
             if ($request->hasFile('image')) {
@@ -272,6 +272,25 @@ class OpportunitesController extends Controller
             ], 500);
         }
     }
+
+    public function getLastThreeOpportunitesActives()
+    {
+        try {
+            $association = Association::where('user_id', Auth::id())->first();
+
+            $opportunites = Opportunite::with(['categorie:id,nom'])->withCount('postules')->where('association_id', $association->id)->orderByDesc('created_at')
+                ->limit(4)
+                ->get();
+
+            return response()->json($opportunites, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération des opportunités actives',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     
 
 
