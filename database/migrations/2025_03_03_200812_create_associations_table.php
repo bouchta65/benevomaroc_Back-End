@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('nom_association');
-            $table->string('sigle_association');
+            $table->date('date_creation');
             $table->string('numero_rna_association')->unique();
             $table->text('objet_social');
             $table->string('site_web')->nullable();
