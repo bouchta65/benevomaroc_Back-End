@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Association;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -67,6 +68,32 @@ class postuleController extends Controller
             return response()->json(['message' => 'Erreur lors de la suppression de la postulation','error' => $e->getMessage()], 500); 
         }
     }
+    public function getAllPostulationsByAssociation() {
+        try {
+            $association = Association::where('user_id', Auth::user()->id)->first();
+    
+            $postulations = Postule::join('opportunites', 'postules.opportunite_id', '=', 'opportunites.id')
+                ->join('benevoles', 'postules.benevole_id', '=', 'benevoles.id') 
+                ->join('users', 'benevoles.user_id', '=', 'users.id') 
+                ->where('opportunites.association_id', $association->id)
+                ->orderBy('postules.created_at', 'desc')
+                ->select('postules.*', 'users.*', 'benevoles.*', 'opportunites.*') 
+                ->paginate(10);
+    
+            return response()->json([
+                "message" => "Postulations récupérées avec succès.",
+                "postulations" => $postulations
+            ], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération des postulations',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    
 
 
 
