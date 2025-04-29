@@ -192,33 +192,22 @@ class ProfileController extends Controller
 
     public function updateAssociationDetails(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'fonction_occupee' => 'sometimes|string',
-            'site_web' => 'nullable|string',
-            'nom_association' => 'sometimes|string',
-            'sigle_association' => 'sometimes|string',
-            'numero_rna_association' => 'sometimes|string',
-            'objet_social' => 'sometimes|string',
-            'presentation_association' => 'sometimes|string',
-            'principales_reussites' => 'sometimes|string',
-        ]);
-    
-        if ($validator->fails()) {
-            return response()->json(["message" => "Erreur de validation", "errors" => $validator->errors()], 422);
-        }
-    
         try {
+            $data = $request->validate([
+                'objet_social' => 'required|string',
+                'site_web' => 'nullable|string',
+                'facebook' => 'nullable|string',
+                'instagram' => 'nullable|string',
+            ]);
+    
             $user = Auth::user();
             $association = Association::where('user_id', $user->id)->firstOrFail();
-            $association->update($request->only([
-                'fonction_occupee', 'nom_association', 'sigle_association',
-                'numero_rna_association', 'objet_social', 'site_web',
-                'presentation_association', 'principales_reussites'
-            ]));
+            $association->update($data);
     
-            return response()->json(["message" => "Détails de l'association mis à jour avec succès","association" => $association], 200);
+            return response()->json(['message' => 'Mise à jour réussie']);
+            
         } catch (\Exception $e) {
-            return response()->json(["message" => "Erreur de mise à jour", "error" => $e->getMessage()], 500);
+            return response()->json(['error' => 'Erreur lors de la mise à jour', 'details' => $e->getMessage()], 500);
         }
     }
 
@@ -274,6 +263,25 @@ class ProfileController extends Controller
             return response()->json(['message' => 'Erreur de réinitialisation du mot de passe', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function getBenevoleData($user_id)
+    {
+        try {
+        
+            $benevole = Benevole::join('users', 'benevoles.user_id', '=', 'users.id')->where('users.id', $user_id)
+                ->select('users.prenom','users.nom','users.email','users.image','users.ville','users.telephone_1','benevoles.domaines_action','benevoles.missions_preferrees','benevoles.talents','benevoles.niveau_etudes','benevoles.metier','benevoles.cv')->first();
+
+            if (!$benevole) {
+                return response()->json(["message" => "Bénévole introuvable"], 404);
+            }
+
+            return response()->json(["benevole" => $benevole], 200);
+        } catch (\Exception $e) {
+            return response()->json(["message" => "Erreur", "error" => $e->getMessage()], 500);
+        }
+    }
+
+
     
     
 

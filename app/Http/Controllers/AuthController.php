@@ -125,7 +125,7 @@ class AuthController extends Controller
             'telephone_1' => 'required|string',
             'telephone_2' => 'nullable|string',
             'nom_association' => 'required|string',
-            'sigle_association' => 'required|string',
+            'date_creation' => 'required|date',
             'numero_rna_association' => 'required|string|unique:associations',
             'objet_social' => 'required|string',
             'site_web' => 'nullable|string',
@@ -179,7 +179,7 @@ class AuthController extends Controller
             Association::create([
                 'user_id' => $user->id,
                 'nom_association' => $request->nom_association,
-                'sigle_association' => $request->sigle_association,
+                'date_creation' => $request->date_creation,
                 'numero_rna_association' => $request->numero_rna_association,
                 'objet_social' => $request->objet_social,
                 'site_web' => $request->site_web,
