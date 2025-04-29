@@ -263,6 +263,25 @@ class ProfileController extends Controller
             return response()->json(['message' => 'Erreur de réinitialisation du mot de passe', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function getBenevoleData($user_id)
+    {
+        try {
+        
+            $benevole = Benevole::join('users', 'benevoles.user_id', '=', 'users.id')->where('users.id', $user_id)
+                ->select('users.prenom','users.nom','users.email','users.image','users.ville','users.telephone_1','benevoles.domaines_action','benevoles.missions_preferrees','benevoles.talents','benevoles.niveau_etudes','benevoles.metier','benevoles.cv')->first();
+
+            if (!$benevole) {
+                return response()->json(["message" => "Bénévole introuvable"], 404);
+            }
+
+            return response()->json(["benevole" => $benevole], 200);
+        } catch (\Exception $e) {
+            return response()->json(["message" => "Erreur", "error" => $e->getMessage()], 500);
+        }
+    }
+
+
     
     
 
