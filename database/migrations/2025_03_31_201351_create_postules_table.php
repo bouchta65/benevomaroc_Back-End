@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('benevole_id')->constrained('benevoles')->onDelete('cascade');
             $table->foreignId('opportunite_id')->constrained('opportunites')->onDelete('cascade');
             $table->enum('etat', ['accepté', 'refusé', 'en attente'])->default('en attente'); 
+            $table->string('certif')->default('En attente');
             $table->date('date');
             $table->timestamps();
         });

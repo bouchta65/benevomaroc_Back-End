@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Postule extends Model
 {
     protected $fillable = [
-        'benevole_id', 'opportunite_id', 'etat' , 'date'
+        'benevole_id', 'opportunite_id', 'etat' , 'date' , 'status'
     ];
 
     public function benevole()
