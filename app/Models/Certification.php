@@ -7,11 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Certification extends Model
 {
     protected $fillable = [
-        'nom', 'description' , 'date_obtention'
+        'benevole_id','opportunite_id','image_path',
     ];
 
-    public function benevoles()
+    public function benevole()
     {
-        return $this->belongsToMany(Benevole::class);   
+        return $this->belongsTo(Benevole::class);
+    }
+    
+    public function opportunite()
+    {
+        return $this->belongsTo(Opportunite::class);
     }
 }
