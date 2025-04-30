@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 class Benevole extends Model
 {
     protected $fillable = [
@@ -24,4 +23,10 @@ class Benevole extends Model
     {
         return $this->hasMany(Postule::class);   
     }
+
+    public function certifications()
+{
+    return $this->hasMany(Certification::class);
+}
+
 }
