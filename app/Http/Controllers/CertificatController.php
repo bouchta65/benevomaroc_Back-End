@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Benevole;
+use App\Models\Association;
+use App\Models\Postule;
 use Illuminate\Http\Request;
 use App\Models\Certification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+
 
 
 
@@ -44,10 +48,15 @@ class CertificatController extends Controller
                 $imageUrl = asset('storage/' . $imagePath);
     
                 $certificat = Certification::create([
-                    'benevole_id' => $benevole_id,
+                    'benevole_id'    => $benevole_id,
                     'opportunite_id' => $opportunite_id,
-                    'image_path' => $imageUrl,
+                    'image_path'     => $imageUrl,
                 ]);
+
+                Postule::where('benevole_id', $benevole_id)
+                ->where('opportunite_id', $opportunite_id)
+                ->update(['certif' => 'Attribués']);
+
     
                 return response()->json(['message' => 'Certificat ajouté avec succès.','certificat' => $certificat,
                 ], 201);
@@ -58,6 +67,52 @@ class CertificatController extends Controller
             ], 500);
         }
     }
+
+    public function getAllPostulationsByAssociationAccpted()
+    {
+        try {
+            $association = Association::where('user_id', Auth::user()->id)->first();
+    
+            if (!$association) {
+                return response()->json(['message' => 'Association non trouvée.'], 404);
+            }
+    
+            $postulations = Postule::join('opportunites', 'postules.opportunite_id', '=', 'opportunites.id')
+                ->join('benevoles', 'postules.benevole_id', '=', 'benevoles.id') 
+                ->join('users', 'benevoles.user_id', '=', 'users.id')
+                ->leftJoin('certifications', function($join) {
+                    $join->on('postules.benevole_id', '=', 'certifications.benevole_id')
+                         ->on('postules.opportunite_id', '=', 'certifications.opportunite_id');
+                }) 
+                ->where('opportunites.association_id', $association->id)
+                ->where('etat', 'accepté')
+                ->orderBy('postules.created_at', 'desc')
+                ->select([
+                    'users.prenom',
+                    'users.nom',
+                    'users.email',
+                    'users.image',
+                    'opportunites.titre',
+                    'opportunites.ville',
+                    'opportunites.date',
+                    'opportunites.duree',
+                    'postules.certif',
+                    'certifications.image_path as certificat_image',
+                ])
+                ->paginate(10);
+    
+            return response()->json([
+                "message" => "Postulations récupérées avec succès.",
+                "postulations" => $postulations
+            ], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération des postulations',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }    
     
 
 }
