@@ -7,6 +7,7 @@ use App\Http\Controllers\CategorieController;
 Use App\http\Controllers\OpportunitesController;
 use App\Http\Controllers\postuleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CertificatController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout',[AuthController::class,'logout']);
@@ -24,13 +25,15 @@ Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
     Route::get('/dashboard/opportunite/{id}/postulations',[postuleController::class,'postulationByOpportunite']);
     Route::get('/dashboard/opportunite/postulations',[postuleController::class,'getAllPostulationsByAssociation']);
     Route::get('/dashboard/opportunite/benevole/{id}',[ProfileController::class,'getBenevoleData']);
+    Route::post('/dashboard/opportunite/{id}/certification/{benevole_id}',[CertificatController::class,'uploadCertificat']);
+    Route::get('/dashboard/opportunite/postulations/accepted',[CertificatController::class,'getAllPostulationsByAssociationAccpted']);
 
 });
 
 Route::middleware(['auth:sanctum', 'role:association','CheckOpportuniteOwner'])->group(function () {
     Route::post('/dashboard/opportunite/{id}',[OpportunitesController::class,'updateOpportunite']);
     Route::delete('/dashboard/opportunite/{id}',[OpportunitesController::class,'deleteOpportunite']);
-    Route::post('/dashboard/opportunite/{id}/postulations/{benevole_id}', [PostuleController::class, 'changeStatusBenevole']);
+    Route::put('/dashboard/opportunite/{id}/postulations/{benevole_id}', [PostuleController::class, 'changeStatusBenevole']);
 });
 
 Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
@@ -43,7 +46,7 @@ Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
     Route::put('/profile/benevole/password', [ProfileController::class, 'updatePassword']);
     Route::Post('/profile/benevole/reset-password', [ProfileController::class, 'reset']);
     Route::get('/profile/benevole/top3Opportunites', [postuleController::class, 'top3Opportunites']);
-    Route::get('/benevole/postulation/check/{id}', [postuleController::class, 'hasAlreadyPostulated']);
+    Route::get('/benevole/postulation/check/{id', [postuleController::class, 'hasAlreadyPostulated']);
 
 
 });

@@ -114,10 +114,25 @@ class postuleController extends Controller
                 'etat' => 'required|string',
             ]);
     
-            $postulation = Postule::where('benevole_id', $benevole_id)->where('opportunite_id', $opportunite_id)->first();
+            $postulation = Postule::where('benevole_id', $benevole_id)
+                ->where('opportunite_id', $opportunite_id)
+                ->first();
     
             if (!$postulation) {
-                return response()->json(['message' => 'Aucune postulation trouvée pour ce bénévole et cette opportunité.'], 404);  
+                return response()->json([
+                    'message' => 'Aucune postulation trouvée pour ce bénévole et cette opportunité.'
+                ], 404);
+            }
+    
+            $nbrBenevole = Opportunite::where('id', $opportunite_id)->value('nb_benevole');
+            $postulationAccpeterCount = Postule::where('opportunite_id', $opportunite_id)
+                ->where('etat', 'accepté')
+                ->count();
+    
+            if ($request->etat === 'accepté' && $postulationAccpeterCount >= $nbrBenevole) {
+                return response()->json([
+                    'message' => 'Le nombre maximum de bénévoles acceptés pour cette opportunité a été atteint.'
+                ], 403);
             }
     
             $postulation->etat = $request->etat;
@@ -135,6 +150,7 @@ class postuleController extends Controller
             ], 500);
         }
     }
+    
 
     public function benevolePostulation()
     {
