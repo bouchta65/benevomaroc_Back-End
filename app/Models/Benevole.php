@@ -25,8 +25,8 @@ class Benevole extends Model
     }
 
     public function certifications()
-{
-    return $this->hasMany(Certification::class);
-}
+    {
+        return $this->hasMany(Certification::class);
+    }
 
 }
