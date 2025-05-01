@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Auth;
 
 class CertificatController extends Controller
 {
-    public function uploadCertificat(Request $request, $benevole_id, $opportunite_id)
+    public function uploadCertificat(Request $request, $opportunite_id ,$benevole_id)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -45,17 +45,19 @@ class CertificatController extends Controller
                 ], 200);
             } else {
                 $imagePath = $request->file('certificat')->store("benevoles/{$folderName}", 'public');
+
                 $imageUrl = asset('storage/' . $imagePath);
-    
+                Postule::where('benevole_id', $benevole_id)
+                ->where('opportunite_id', $opportunite_id)
+                ->update(['certif' => 'Attribués']);
+                
                 $certificat = Certification::create([
                     'benevole_id'    => $benevole_id,
                     'opportunite_id' => $opportunite_id,
                     'image_path'     => $imageUrl,
                 ]);
 
-                Postule::where('benevole_id', $benevole_id)
-                ->where('opportunite_id', $opportunite_id)
-                ->update(['certif' => 'Attribués']);
+                
 
     
                 return response()->json(['message' => 'Certificat ajouté avec succès.','certificat' => $certificat,
@@ -92,7 +94,9 @@ class CertificatController extends Controller
                     'users.nom',
                     'users.email',
                     'users.image',
+                    'benevoles.id',
                     'opportunites.titre',
+                    'opportunites.id as opportunite_id',
                     'opportunites.ville',
                     'opportunites.date',
                     'opportunites.duree',
