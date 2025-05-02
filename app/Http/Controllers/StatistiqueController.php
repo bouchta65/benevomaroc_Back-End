@@ -192,4 +192,85 @@ class StatistiqueController extends Controller
             ], 500);
         }
     }
+
+    public function getAdminStatistics()
+    {
+        try {
+            $totalAssociations = Association::count();
+            $totalOpportunites = Opportunite::count();
+            $totalBenevoles = Benevole::count();
+            $totalCandidatures = Postule::count();
+            $totalCertifications = Certification::count();
+
+            $opportunitiesByStatus = [
+                'accepté' => Postule::where('etat', 'accepté')->count(),
+                'refusé' => Postule::where('etat', 'refusé')->count(),
+                'en_attente' => Postule::where('etat', 'en attente')->count(),
+            ];
+
+            $categoriesCount = DB::table('categories')->count();
+
+            $associationsByStatus = [
+                'actif' => Association::where('statut_dossier', 'actif')->count(),
+                'en_attente' => Association::where('statut_dossier', 'en attente')->count(),
+                'refusé' => Association::where('statut_dossier', 'refusé')->count(),
+            ];
+
+            $mostActiveAssociations = Association::select(
+                'associations.id',
+                'associations.nom_association',
+                DB::raw('COUNT(opportunites.id) as opportunites_count')
+            )
+                ->join('opportunites', 'associations.id', '=', 'opportunites.association_id')
+                ->groupBy('associations.id', 'associations.nom_association')
+                ->orderByDesc('opportunites_count')
+                ->take(5)
+                ->get();
+
+            $mostPopularOpportunites = Opportunite::select(
+                'opportunites.id',
+                'opportunites.titre',
+                'opportunites.image',
+                'opportunites.date',
+                'opportunites.ville',
+                DB::raw('COUNT(postules.id) as postules_count')
+            )
+                ->join('postules', 'opportunites.id', '=', 'postules.opportunite_id')
+                ->groupBy('opportunites.id', 'opportunites.titre')
+                ->orderByDesc('postules_count')
+                ->take(5)
+                ->get();
+
+            $monthlyStats = Postule::select(
+                DB::raw('MONTH(date) as month'),
+                DB::raw('COUNT(*) as total_postules'),
+                DB::raw('SUM(CASE WHEN etat = "accepté" THEN 1 ELSE 0 END) as accepted_postules'),
+                DB::raw('SUM(CASE WHEN etat = "refusé" THEN 1 ELSE 0 END) as refused_postules')
+            )
+                ->groupBy(DB::raw('MONTH(date)'))
+                ->get();
+
+            $statistics = [
+                'totalAssociations' => $totalAssociations,
+                'totalOpportunites' => $totalOpportunites,
+                'totalBenevoles' => $totalBenevoles,
+                'totalCandidatures' => $totalCandidatures,
+                'totalCertifications' => $totalCertifications,
+                'opportunitiesByStatus' => $opportunitiesByStatus,
+                'categoriesCount' => $categoriesCount,
+                'associationsByStatus' => $associationsByStatus,
+                'mostActiveAssociations' => $mostActiveAssociations,
+                'mostPopularOpportunites' => $mostPopularOpportunites,
+                'monthlyStats' => $monthlyStats,
+            ];
+
+            return response()->json($statistics);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'An error occurred while retrieving admin statistics',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
