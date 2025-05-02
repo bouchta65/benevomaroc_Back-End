@@ -56,7 +56,7 @@ Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
 
 });
 
-Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('/categorie', [CategorieController::class, 'addCategorie']);
     Route::put('/categorie/{id}', [CategorieController::class, 'updateCategorie']);
     Route::delete('/categorie/{id}', [CategorieController::class, 'deleteCategorie']);
