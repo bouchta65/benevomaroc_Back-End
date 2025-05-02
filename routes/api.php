@@ -8,6 +8,7 @@ Use App\http\Controllers\OpportunitesController;
 use App\Http\Controllers\postuleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CertificatController;
+use App\Http\Controllers\StatistiqueController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout',[AuthController::class,'logout']);
@@ -27,6 +28,7 @@ Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
     Route::get('/dashboard/opportunite/benevole/{id}',[ProfileController::class,'getBenevoleData']);
     Route::post('/dashboard/opportunite/{id}/certification/{benevole_id}',[CertificatController::class,'uploadCertificat']);
     Route::get('/dashboard/opportunite/postulations/accepted',[CertificatController::class,'getAllPostulationsByAssociationAccpted']);
+    Route::get('/opportunitess/Statistics', [StatistiqueController::class, 'getAssociationStatistics']);
 
 });
 
@@ -47,7 +49,10 @@ Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
     Route::Post('/profile/benevole/reset-password', [ProfileController::class, 'reset']);
     Route::get('/profile/benevole/top3Opportunites', [postuleController::class, 'top3Opportunites']);
     Route::get('/benevole/postulation/check/{id', [postuleController::class, 'hasAlreadyPostulated']);
+    Route::get('/benevole/Certififctaion', [CertificatController::class, 'getAllCertificationsForUser']);
+    Route::get('/benevole/Statistics', [StatistiqueController::class, 'getBenevoleStatistics']);
 
+    
 
 });
 
@@ -57,7 +62,7 @@ Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
     Route::delete('/categorie/{id}', [CategorieController::class, 'deleteCategorie']);
     Route::put('/dashboard/profile/admin/userInfo', [ProfileController::class, 'updateUserInfo']);
     Route::put('/dashboard/profile/admin/password', [ProfileController::class, 'updatePassword']);
-    
+
     
 });
 

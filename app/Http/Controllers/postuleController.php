@@ -178,7 +178,7 @@ class postuleController extends Controller
                 return response()->json(['message' => 'Bénévole non trouvé.'], 404);
             }
 
-            $opportunites = Postule::with('opportunite') 
+            $opportunites = Postule::with(['opportunite', 'opportunite.categorie']) 
                 ->where('benevole_id', $benevole->id)
                 ->where('etat', 'accepté')
                 ->orderBy('date', 'desc')

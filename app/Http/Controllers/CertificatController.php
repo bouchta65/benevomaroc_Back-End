@@ -117,6 +117,41 @@ class CertificatController extends Controller
             ], 500);
         }
     }    
+
+    public function getAllCertificationsForUser()
+    {
+        try {
+            $userId = Auth::id();
+            $benevole = Benevole::where('user_id', $userId)->firstOrFail();
+    
+            $lastCertifications = Certification::where('benevole_id', $benevole->id)
+                ->with('opportunite:id,id,titre') 
+                ->orderBy('created_at', 'desc')
+                ->take(3)
+                ->get();
+    
+            $paginatedCertifications = Certification::where('benevole_id', $benevole->id)
+                ->with('opportunite:id,id,titre')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+    
+            return response()->json([
+                'message' => 'Certificats récupérés avec succès.',
+                'last_certifications' => $lastCertifications,
+                'all_certifications' => $paginatedCertifications
+            ], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération des certificats.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    
+
     
 
 }
