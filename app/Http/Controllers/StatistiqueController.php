@@ -197,80 +197,93 @@ class StatistiqueController extends Controller
     {
         try {
             $totalAssociations = Association::count();
-            $totalOpportunites = Opportunite::count();
+            $acceptedAssociations = Association::where('statut_dossier', 'actif')->count();
+            $pendingAssociations = Association::where('statut_dossier', 'en attente')->count();
+            $refusedAssociations = Association::where('statut_dossier', 'refusé')->count();
+
+            $activeOpportunites = Opportunite::where('status', 'actif')->count();
+            $pendingOpportunites = Opportunite::where('status', 'en attente')->count();
+            $closedOpportunites = Opportunite::where('status', 'fermé')->count();
+
             $totalBenevoles = Benevole::count();
-            $totalCandidatures = Postule::count();
-            $totalCertifications = Certification::count();
 
-            $opportunitiesByStatus = [
-                'accepté' => Postule::where('etat', 'accepté')->count(),
-                'refusé' => Postule::where('etat', 'refusé')->count(),
-                'en_attente' => Postule::where('etat', 'en attente')->count(),
-            ];
+            $last4Benevoles = Postule::orderBy('date', 'desc')
+                ->take(4)
+                ->with(['benevole.user', 'opportunite'])
+                ->get()
+                ->map(function ($postule) {
+                    return [
+                        'prenom' => $postule->benevole->user->prenom,
+                        'nom' => $postule->benevole->user->nom,
+                        'image' => $postule->benevole->user->image,
+                        'email' => $postule->benevole->user->email,
+                        'telephone_1' => $postule->benevole->user->telephone_1,
+                        'opportunite_nom' => $postule->opportunite->titre,
+                        'etat_postule' => $postule->etat,
+                        'date_postule' => $postule->date,
+                    ];
+                });
 
-            $categoriesCount = DB::table('categories')->count();
-
-            $associationsByStatus = [
-                'actif' => Association::where('statut_dossier', 'actif')->count(),
-                'en_attente' => Association::where('statut_dossier', 'en attente')->count(),
-                'refusé' => Association::where('statut_dossier', 'refusé')->count(),
-            ];
-
-            $mostActiveAssociations = Association::select(
-                'associations.id',
-                'associations.nom_association',
-                DB::raw('COUNT(opportunites.id) as opportunites_count')
-            )
-                ->join('opportunites', 'associations.id', '=', 'opportunites.association_id')
-                ->groupBy('associations.id', 'associations.nom_association')
-                ->orderByDesc('opportunites_count')
-                ->take(5)
-                ->get();
-
-            $mostPopularOpportunites = Opportunite::select(
-                'opportunites.id',
-                'opportunites.titre',
-                'opportunites.image',
-                'opportunites.date',
-                'opportunites.ville',
+            $topBenevoles = Benevole::select(
+                'benevoles.id',
+                'users.prenom',
+                'users.nom',
+                'users.image',
                 DB::raw('COUNT(postules.id) as postules_count')
             )
-                ->join('postules', 'opportunites.id', '=', 'postules.opportunite_id')
-                ->groupBy('opportunites.id', 'opportunites.titre')
+                ->join('users', 'benevoles.user_id', '=', 'users.id')
+                ->join('postules', 'benevoles.id', '=', 'postules.benevole_id')
+                ->groupBy('benevoles.id', 'users.prenom', 'users.nom', 'users.image')
                 ->orderByDesc('postules_count')
                 ->take(5)
                 ->get();
 
-            $monthlyStats = Postule::select(
-                DB::raw('MONTH(date) as month'),
-                DB::raw('COUNT(*) as total_postules'),
-                DB::raw('SUM(CASE WHEN etat = "accepté" THEN 1 ELSE 0 END) as accepted_postules'),
-                DB::raw('SUM(CASE WHEN etat = "refusé" THEN 1 ELSE 0 END) as refused_postules')
-            )
-                ->groupBy(DB::raw('MONTH(date)'))
+            $mostPopularOpportunites = Opportunite::select('opportunites.id', 'opportunites.titre', 'opportunites.image', 'opportunites.date', 'opportunites.ville', DB::raw('COUNT(postules.id) as postules_count'))
+                ->join('postules', 'opportunites.id', '=', 'postules.opportunite_id')
+                ->groupBy('opportunites.id', 'opportunites.titre', 'opportunites.image', 'opportunites.date', 'opportunites.ville')
+                ->orderByDesc('postules_count')
+                ->take(3)
                 ->get();
 
+            $successRate = $totalAssociations > 0 ? ($acceptedAssociations / $totalAssociations) * 100 : 0;
+
+            $pendingTasks = Opportunite::where('status', 'en attente')->count();
+
+            $totalPostulation = Postule::count();
+
             $statistics = [
-                'totalAssociations' => $totalAssociations,
-                'totalOpportunites' => $totalOpportunites,
-                'totalBenevoles' => $totalBenevoles,
-                'totalCandidatures' => $totalCandidatures,
-                'totalCertifications' => $totalCertifications,
-                'opportunitiesByStatus' => $opportunitiesByStatus,
-                'categoriesCount' => $categoriesCount,
-                'associationsByStatus' => $associationsByStatus,
-                'mostActiveAssociations' => $mostActiveAssociations,
-                'mostPopularOpportunites' => $mostPopularOpportunites,
-                'monthlyStats' => $monthlyStats,
+                'associationStatistics' => [
+                    'totalAssociations' => $totalAssociations,
+                    'acceptedAssociations' => $acceptedAssociations,
+                    'pendingAssociations' => $pendingAssociations,
+                    'refusedAssociations' => $refusedAssociations,
+                ],
+                'opportuniteStatistics' => [
+                    'activeOpportunites' => $activeOpportunites,
+                    'pendingOpportunites' => $pendingOpportunites,
+                    'closedOpportunites' => $closedOpportunites,
+                ],
+                'benevolesStatistics' => [
+                    'totalBenevoles' => $totalBenevoles,
+                    'totalPostules' => $totalPostulation,
+                ],
+                'last4Benevoles' => $last4Benevoles,
+                'additionalStatistics' => [
+                    'topBenevoles' => $topBenevoles,
+                    'mostPopularOpportunites' => $mostPopularOpportunites,
+                    'successRate' => $successRate,
+                    'pendingTasks' => $pendingTasks,
+                ],
             ];
 
             return response()->json($statistics);
 
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'An error occurred while retrieving admin statistics',
+                'error' => 'An error occurred while retrieving statistics',
                 'details' => $e->getMessage(),
             ], 500);
         }
     }
+
 }
