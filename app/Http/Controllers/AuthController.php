@@ -308,6 +308,26 @@ class AuthController extends Controller
         }
     }
 
+    public function getAllAssociations()
+    {
+        try {
+            $associations = Association::orderByRaw("statut_dossier = 'en attente' DESC") 
+            ->orderBy('date_creation', 'desc') 
+            ->get();
+    
+            return response()->json([
+                'message' => 'Liste des associations récupérée avec succès.',
+                'associations' => $associations
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération des associations.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+
 
 
 
