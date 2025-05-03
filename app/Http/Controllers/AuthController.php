@@ -208,22 +208,38 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:8',
         ]);
-
+    
         try {
             $user = User::where('email', $validatedData['email'])->first();
-
+    
             if (!$user || !Hash::check($validatedData['password'], $user->password)) {
-                return response()->json(["message" => "Email or password is incorrect"], 401);
+                return response()->json(["message" => "Email ou mot de passe incorrect"], 401);
             }
-
+    
+            if ($user->role === 'association') {
+                $association = Association::where('user_id',$user->id)->first(); 
+                if (!$association || $association->statut_dossier !== 'actif') {
+                    return response()->json(["message" => "Votre compte n’a pas encore été validé."], 403);
+                }
+            }
+    
             $user->tokens()->delete();
             $token = $user->createToken("AuthSanctum", ["*"], now()->addHours(4))->plainTextToken;
-
-            return response()->json(["message" => "User successfully logged in", "token" => $token,"user" => $user], 200);
+    
+            return response()->json([
+                "message" => "Connexion réussie",
+                "token" => $token,
+                "user" => $user
+            ], 200);
+    
         } catch (\Exception $e) {
-            return response()->json(["message" => "Error", "error" => $e->getMessage()], 500);
+            return response()->json([
+                "message" => "Erreur lors de la connexion",
+                "error" => $e->getMessage()
+            ], 500);
         }
     }
+    
 
     public function logout(request $request){
         try {
@@ -260,6 +276,8 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+
 
 
 

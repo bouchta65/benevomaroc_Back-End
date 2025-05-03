@@ -8,7 +8,7 @@ class Association extends User
 {
     protected $fillable = [
         'user_id', 'nom_association', 'date_creation', 'numero_rna_association', 'objet_social', 'site_web' ,'facebook','instagram', 'logo', 
-        'carte_nationale', 'status_association'
+        'carte_nationale', 'status_association','statut_dossier'
     ];
 
 

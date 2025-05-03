@@ -28,7 +28,7 @@ Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
     Route::get('/dashboard/opportunite/benevole/{id}',[ProfileController::class,'getBenevoleData']);
     Route::post('/dashboard/opportunite/{id}/certification/{benevole_id}',[CertificatController::class,'uploadCertificat']);
     Route::get('/dashboard/opportunite/postulations/accepted',[CertificatController::class,'getAllPostulationsByAssociationAccpted']);
-    Route::get('/opportunitess/Statistics', [StatistiqueController::class, 'getAssociationStatistics']);
+    Route::get('/dashboard/opportunitess/Statistics', [StatistiqueController::class, 'getAssociationStatistics']);
 
 });
 
@@ -56,12 +56,13 @@ Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
 
 });
 
-Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('/categorie', [CategorieController::class, 'addCategorie']);
     Route::put('/categorie/{id}', [CategorieController::class, 'updateCategorie']);
     Route::delete('/categorie/{id}', [CategorieController::class, 'deleteCategorie']);
     Route::put('/dashboard/profile/admin/userInfo', [ProfileController::class, 'updateUserInfo']);
     Route::put('/dashboard/profile/admin/password', [ProfileController::class, 'updatePassword']);
+    Route::get('/dashboard/admin/Statistics', [StatistiqueController::class, 'getAdminStatistics']);
 
     
 });

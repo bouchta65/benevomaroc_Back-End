@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('logo');
             $table->string('status_association');
             $table->string('carte_nationale');
+            $table->enum('statut_dossier', ['actif', 'refusé', 'en attente'])->default('en attente');
             $table->timestamps();
         });
     }
