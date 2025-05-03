@@ -298,7 +298,7 @@ class AuthController extends Controller
 
             $user = User::findOrFail($association->user_id);
             
-            $statusMessage = $request->statut == 'actif' 
+            $statusMessage = $request->statut == 'approuvé' 
                 ? 'Félicitations ! Votre demande a été acceptée.' 
                 : 'Désolé, votre demande a été refusée.';
 
@@ -322,12 +322,14 @@ class AuthController extends Controller
     }
 
 
-    public function getAllAssociations()
+    public function getAllAssociations(Request $request)
     {
         try {
-            $associations = Association::orderByRaw("statut_dossier = 'en attente' DESC") 
-            ->orderBy('date_creation', 'desc') 
-            ->get();
+            $perPage = $request->input('per_page', 10);
+    
+            $associations = Association::orderByRaw("statut_dossier = 'en attente' DESC")
+                ->orderBy('date_creation', 'desc')
+                ->paginate($perPage);
     
             return response()->json([
                 'message' => 'Liste des associations récupérée avec succès.',
@@ -340,6 +342,24 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function getAssociationById($associationId)
+    {
+        try {
+            $association = Association::with('user')->findOrFail($associationId);
+            return response()->json([
+                'message' => 'Association récupérée avec succès.',
+                'association' => $association
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération de l\'association.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    
     
 
 
