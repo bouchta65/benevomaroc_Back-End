@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -295,6 +296,18 @@ class AuthController extends Controller
             $association->statut_dossier = $request->statut;
             $association->save();
 
+            $user = User::findOrFail($association->user_id);
+            
+            $statusMessage = $request->statut == 'actif' 
+                ? 'Félicitations ! Votre demande a été acceptée.' 
+                : 'Désolé, votre demande a été refusée.';
+
+            $url = url('Benevo-maroc/login');
+            Mail::raw("Bonjour {$user->prenom},\n\n{$statusMessage}\n\nVous pouvez vous connecter à votre compte en cliquant sur le lien suivant : {$url}", function ($message) use ($user) {
+                $message->to($user->email)
+                        ->subject('Mise à jour de votre statut - Benevo Maroc');
+            });
+
             return response()->json([
                 'message' => "Statut de l'association mis à jour avec succès.",
                 'association' => $association
@@ -307,6 +320,7 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
 
     public function getAllAssociations()
     {
