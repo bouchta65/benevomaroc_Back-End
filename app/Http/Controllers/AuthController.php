@@ -277,6 +277,39 @@ class AuthController extends Controller
         }
     }
 
+    public function changeStatusAssociation(Request $request, $associationId)
+    {
+        $validator = Validator::make($request->all(), [
+            'statut' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Erreur de validation.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $association = Association::findOrFail($associationId);
+            $association->statut_dossier = $request->statut;
+            $association->save();
+
+            return response()->json([
+                'message' => "Statut de l'association mis à jour avec succès.",
+                'association' => $association
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => "Erreur lors de la mise à jour du statut.",
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
 
 
 
