@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -276,6 +277,92 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function changeStatusAssociation(Request $request, $associationId)
+    {
+        $validator = Validator::make($request->all(), [
+            'statut' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Erreur de validation.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $association = Association::findOrFail($associationId);
+            $association->statut_dossier = $request->statut;
+            $association->save();
+
+            $user = User::findOrFail($association->user_id);
+            
+            $statusMessage = $request->statut == 'approuvé' 
+                ? 'Félicitations ! Votre demande a été acceptée.' 
+                : 'Désolé, votre demande a été refusée.';
+
+            $url = url('Benevo-maroc/login');
+            Mail::raw("Bonjour {$user->prenom},\n\n{$statusMessage}\n\nVous pouvez vous connecter à votre compte en cliquant sur le lien suivant : {$url}", function ($message) use ($user) {
+                $message->to($user->email)
+                        ->subject('Mise à jour de votre statut - Benevo Maroc');
+            });
+
+            return response()->json([
+                'message' => "Statut de l'association mis à jour avec succès.",
+                'association' => $association
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => "Erreur lors de la mise à jour du statut.",
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function getAllAssociations(Request $request)
+    {
+        try {
+            $perPage = $request->input('per_page', 10);
+    
+            $associations = Association::orderByRaw("statut_dossier = 'en attente' DESC")
+                ->orderBy('date_creation', 'desc')
+                ->paginate($perPage);
+    
+            return response()->json([
+                'message' => 'Liste des associations récupérée avec succès.',
+                'associations' => $associations
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération des associations.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getAssociationById($associationId)
+    {
+        try {
+            $association = Association::with('user')->findOrFail($associationId);
+            return response()->json([
+                'message' => 'Association récupérée avec succès.',
+                'association' => $association
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération de l\'association.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    
+    
+
+
 
 
 

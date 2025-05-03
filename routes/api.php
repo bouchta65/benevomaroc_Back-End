@@ -63,6 +63,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('/dashboard/profile/admin/userInfo', [ProfileController::class, 'updateUserInfo']);
     Route::put('/dashboard/profile/admin/password', [ProfileController::class, 'updatePassword']);
     Route::get('/dashboard/admin/Statistics', [StatistiqueController::class, 'getAdminStatistics']);
+    Route::put('/dashboard/admin/associations/{id}/status', [AuthController::class, 'changeStatusAssociation']);
+    Route::get('/dashboard/admin/associations', [AuthController::class, 'getAllAssociations']);
+    Route::get('/dashboard/admin/associations/details/{id}', [AuthController::class, 'getAssociationById']);
 
     
 });
