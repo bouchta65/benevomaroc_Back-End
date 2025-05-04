@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Association;
 use Illuminate\Http\Request;
 use App\Models\Opportunite;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 use App\Services\PostulationService;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -167,7 +169,7 @@ class OpportunitesController extends Controller
     public function getOpportuniteById($opportunite_id)
     {
         try {
-            $opportunite = Opportunite::with('categorie')->with('association')->withCount('postules')->find($opportunite_id);
+            $opportunite = Opportunite::with('categorie')->with('association.user')->withCount('postules')->find($opportunite_id);
 
 
             if (!$opportunite) {
@@ -243,7 +245,7 @@ class OpportunitesController extends Controller
     {
         try {
             $opportunity = Opportunite::find($id);
-
+            
             if (!$opportunity) {
                 return response()->json(['message' => 'Opportunité non trouvée.'], 404);
             }   
@@ -290,6 +292,72 @@ class OpportunitesController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erreur lors de la récupération des opportunités actives',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function changeOpportunityStatus(Request $request, $OpportuniteId)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|string', 
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Erreur de validation.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+    
+        try {
+            $Opportunite = Opportunite::findOrFail($OpportuniteId);
+            $Opportunite->status = $request->status;
+            $Opportunite->save();
+    
+            $associationId = $Opportunite->association_id;
+            $association = Association::where('id',$associationId)->first();
+            $user = User::where('id',$association->user_id)->first();
+            
+            $statusMessage = $request->status == 'actif' 
+                ? 'Félicitations ! Votre opportunité a été acceptée.' 
+                : 'Désolé, votre opportunité a été refusée.';
+    
+            $url = url('Benevo-maroc/login'); 
+            Mail::raw("Bonjour {$user->prenom},\n\n{$statusMessage}\n\nVous pouvez vous connecter à votre compte en cliquant sur le lien suivant : {$url}", function ($message) use ($user) {
+                $message->to($user->email)
+                        ->subject('Mise à jour de votre opportunité - Benevo Maroc');
+            });
+    
+            return response()->json([
+                'message' => "Statut de l'opportunité mis à jour avec succès.",
+                'Opportunite' => $user
+            ], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => "Erreur lors de la mise à jour du statut de l'opportunité.",
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getAllOpportunities(Request $request)
+    {
+        try {
+            $perPage = $request->input('per_page', 10);
+
+            $opportunities = Opportunite::orderByRaw("status = 'en attente' DESC")
+                ->orderBy('created_at', 'desc')
+                ->paginate($perPage);
+
+            return response()->json([
+                'message' => 'Liste des opportunités récupérée avec succès.',
+                'opportunities' => $opportunities
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération des opportunités.',
                 'error' => $e->getMessage()
             ], 500);
         }
