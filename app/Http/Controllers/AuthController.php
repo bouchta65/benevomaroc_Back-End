@@ -219,7 +219,7 @@ class AuthController extends Controller
     
             if ($user->role === 'association') {
                 $association = Association::where('user_id',$user->id)->first(); 
-                if (!$association || $association->statut_dossier !== 'actif') {
+                if (!$association || $association->statut_dossier !== 'approuvé') {
                     return response()->json(["message" => "Votre compte n’a pas encore été validé."], 403);
                 }
             }
@@ -358,6 +358,9 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+
+
 
     
     
