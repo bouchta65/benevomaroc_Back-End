@@ -57,15 +57,18 @@ Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-    Route::post('/categorie', [CategorieController::class, 'addCategorie']);
-    Route::put('/categorie/{id}', [CategorieController::class, 'updateCategorie']);
-    Route::delete('/categorie/{id}', [CategorieController::class, 'deleteCategorie']);
+    Route::post('dashboard/categories', [CategorieController::class, 'addCategorie']);
+    Route::put('dashboard/categories/{id}', [CategorieController::class, 'updateCategorie']);
+    Route::delete('dashboard/categories/{id}', [CategorieController::class, 'deleteCategorie']);
+    Route::get('dashboard/categories', [CategorieController::class, 'getCategorie']);
     Route::put('/dashboard/profile/admin/userInfo', [ProfileController::class, 'updateUserInfo']);
     Route::put('/dashboard/profile/admin/password', [ProfileController::class, 'updatePassword']);
     Route::get('/dashboard/admin/Statistics', [StatistiqueController::class, 'getAdminStatistics']);
     Route::put('/dashboard/admin/associations/{id}/status', [AuthController::class, 'changeStatusAssociation']);
     Route::get('/dashboard/admin/associations', [AuthController::class, 'getAllAssociations']);
     Route::get('/dashboard/admin/associations/details/{id}', [AuthController::class, 'getAssociationById']);
+    Route::put('/dashboard/admin/opportunites/{id}/status', [OpportunitesController::class, 'changeOpportunityStatus']);
+    Route::get('/dashboard/admin/opportunites/', [OpportunitesController::class, 'getAllOpportunities']);
 
     
 });
@@ -77,7 +80,6 @@ Route::get('/opportunites/type', [OpportunitesController::class, 'filterByTypes'
 Route::get('/opportunites/populare', [OpportunitesController::class, 'getMostPopularOpportunites']);
 Route::get('/opportunites/recent', [OpportunitesController::class, 'getRecentOpportunites']);
 Route::get('/opportunites/{id}/similar', [OpportunitesController::class, 'getSimilarOpportunites']);
-Route::get('/categorie', [CategorieController::class, 'getCategorie']);
 
 
 
@@ -90,5 +92,5 @@ Route::post('/association',[AuthController::class,'registerAssociation']);
 
 
 
-
+Route::get('/categorie', [CategorieController::class, 'getCategorie']);
 Route::get('/opportunites/{id}', [OpportunitesController::class, 'getOpportuniteById']);
