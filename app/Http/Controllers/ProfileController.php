@@ -109,8 +109,7 @@ class ProfileController extends Controller
                         ], 422);
                     }
                     
-                    $folderName = 'admin_' . Str::slug($user->cin, '_');
-                    $folderPath = "admins/{$folderName}";
+                    $folderPath = "admins/bouchta_mohamed";
                     if (!Storage::disk('public')->exists($folderPath)) {
                         Storage::disk('public')->makeDirectory($folderPath);
                     }
@@ -139,6 +138,7 @@ class ProfileController extends Controller
                 ], 500);
             }
         }
+        return response()->json(["message" => "Profil mis à jour avec succès", "user" => $user], 200);
     }
 
 

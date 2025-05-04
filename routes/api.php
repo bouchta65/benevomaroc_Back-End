@@ -13,6 +13,8 @@ use App\Http\Controllers\StatistiqueController;
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout',[AuthController::class,'logout']);
     Route::get('/auth-status', [AuthController::class, 'authStatus']);
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
+    Route::Post('/profile/reset-password', [ProfileController::class, 'reset']);
 });
 
 Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
@@ -20,7 +22,6 @@ Route::middleware(['auth:sanctum', 'role:association'])->group(function () {
     Route::get('/dashboard/profile', [ProfileController::class, 'getProfile']);
     Route::post('/dashboard/profile/association/userInfo', [ProfileController::class, 'updateUserInfo']);
     Route::post('/dashboard/profile/association/details', [ProfileController::class, 'updateAssociationDetails']);
-    Route::put('/dashboard/profile/association/password', [ProfileController::class, 'updatePassword']);
     Route::get('/dashboard/Myopportunites', [OpportunitesController::class, 'getOpportunitesByAssociation']);
     Route::get('/dashboard/lastThreeOpportunites', [OpportunitesController::class, 'getLastThreeOpportunitesActives']);
     Route::get('/dashboard/opportunite/{id}/postulations',[postuleController::class,'postulationByOpportunite']);
@@ -36,6 +37,8 @@ Route::middleware(['auth:sanctum', 'role:association','CheckOpportuniteOwner'])-
     Route::post('/dashboard/opportunite/{id}',[OpportunitesController::class,'updateOpportunite']);
     Route::delete('/dashboard/opportunite/{id}',[OpportunitesController::class,'deleteOpportunite']);
     Route::put('/dashboard/opportunite/{id}/postulations/{benevole_id}', [PostuleController::class, 'changeStatusBenevole']);
+    Route::get('/dashboard/association/opportunites/{id}', [OpportunitesController::class, 'getOpportuniteAssocById']);
+
 });
 
 Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
@@ -45,8 +48,6 @@ Route::middleware(['auth:sanctum', 'role:benevole'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'getProfile']);
     Route::post('/profile/benevole/userInfo', [ProfileController::class, 'updateUserInfo']);
     Route::post('/profile/benevole/details', [ProfileController::class, 'updateBenevoleDetails']);
-    Route::put('/profile/benevole/password', [ProfileController::class, 'updatePassword']);
-    Route::Post('/profile/benevole/reset-password', [ProfileController::class, 'reset']);
     Route::get('/profile/benevole/top3Opportunites', [postuleController::class, 'top3Opportunites']);
     Route::get('/benevole/postulation/check/{id', [postuleController::class, 'hasAlreadyPostulated']);
     Route::get('/benevole/Certififctaion', [CertificatController::class, 'getAllCertificationsForUser']);
@@ -61,15 +62,15 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('dashboard/categories/{id}', [CategorieController::class, 'updateCategorie']);
     Route::delete('dashboard/categories/{id}', [CategorieController::class, 'deleteCategorie']);
     Route::get('dashboard/categories', [CategorieController::class, 'getCategorie']);
-    Route::put('/dashboard/profile/admin/userInfo', [ProfileController::class, 'updateUserInfo']);
-    Route::put('/dashboard/profile/admin/password', [ProfileController::class, 'updatePassword']);
+    Route::post('/dashboard/profile/admin/userInfo', [ProfileController::class, 'updateUserInfo']);
     Route::get('/dashboard/admin/Statistics', [StatistiqueController::class, 'getAdminStatistics']);
     Route::put('/dashboard/admin/associations/{id}/status', [AuthController::class, 'changeStatusAssociation']);
     Route::get('/dashboard/admin/associations', [AuthController::class, 'getAllAssociations']);
     Route::get('/dashboard/admin/associations/details/{id}', [AuthController::class, 'getAssociationById']);
     Route::put('/dashboard/admin/opportunites/{id}/status', [OpportunitesController::class, 'changeOpportunityStatus']);
     Route::get('/dashboard/admin/opportunites/', [OpportunitesController::class, 'getAllOpportunities']);
-
+    Route::get('/dashboard/admin/profile', [ProfileController::class, 'getProfile']);
+    Route::get('/dashboard/admin/opportunites/{id}', [OpportunitesController::class, 'getOpportuniteAssocById']);
     
 });
 
