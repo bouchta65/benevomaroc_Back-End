@@ -158,7 +158,7 @@ class OpportunitesController extends Controller
     {
         try {
             $perPage = $request->input('per_page', 9);
-            $opportunites = Opportunite::with('categorie')->withCount('postules')->orderByDesc('created_at')->paginate($perPage);
+            $opportunites = Opportunite::with('categorie')->withCount('postules')->where('status', 'actif')->orderByDesc('created_at')->paginate($perPage);
     
             return response()->json($opportunites, 200);
         } catch (\Exception $e) {
@@ -169,7 +169,7 @@ class OpportunitesController extends Controller
     public function getOpportuniteById($opportunite_id)
     {
         try {
-            $opportunite = Opportunite::with('categorie')->with('association.user')->withCount('postules')->find($opportunite_id);
+            $opportunite = Opportunite::with('categorie')->with('association.user')->where('status', 'actif')->withCount('postules')->find($opportunite_id);
 
 
             if (!$opportunite) {
@@ -188,7 +188,7 @@ class OpportunitesController extends Controller
     public function getTop3Opportunite()
     {
         try {
-            $topOpportunites = Opportunite::withCount('postules')->orderByDesc('postules_count')->take(3)->get();
+            $topOpportunites = Opportunite::withCount('postules')->where('status', 'actif')->orderByDesc('postules_count')->take(3)->get();
             
             return response()->json(['top_opportunites' => $topOpportunites], 200);
         } catch (\Exception $e) {
@@ -201,7 +201,7 @@ class OpportunitesController extends Controller
     {
         try {
             $perPage = $request->input('per_page', 9);
-            $query = Opportunite::with('categorie')->withCount('postules');
+            $query = Opportunite::with('categorie')->where('status', 'actif')->withCount('postules');
 
             if ($request->has('ville') && $request->ville !== null) {
                 $query->where('ville', 'like', '%' . $request->ville . '%');
@@ -245,12 +245,12 @@ class OpportunitesController extends Controller
     {
         try {
             $opportunity = Opportunite::find($id);
-            
+
             if (!$opportunity) {
                 return response()->json(['message' => 'Opportunité non trouvée.'], 404);
             }   
 
-            $similarOpportunites = Opportunite::where('categorie_id', $opportunity->categorie_id)->where('id', '!=', $id) ->orderByDesc('created_at')->limit(2)->get();
+            $similarOpportunites = Opportunite::where('categorie_id', $opportunity->categorie_id)->where('status', 'actif')->where('id', '!=', $id) ->orderByDesc('created_at')->limit(2)->get();
 
             return response()->json($similarOpportunites, 200);
         } catch (\Exception $e) {
@@ -276,6 +276,25 @@ class OpportunitesController extends Controller
                 'message' => 'Erreur lors de la récupération des opportunités de l\'association',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function getOpportuniteAssocById($opportunite_id)
+    {
+        try {
+            $opportunite = Opportunite::with('categorie')->with('association.user')->withCount('postules')->find($opportunite_id);
+
+
+            if (!$opportunite) {
+                return response()->json(['message' => 'Opportunite non trouvé.'], 404);
+            }
+
+            $status = $this->postulationService->getPostulationStatus($opportunite_id);
+
+            return response()->json(['opportunite' => $opportunite , 'status'=>$status], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la récupération de l\'opportunite','error' => $e->getMessage()], 500);
         }
     }
 
@@ -347,7 +366,7 @@ class OpportunitesController extends Controller
         try {
             $perPage = $request->input('per_page', 10);
 
-            $opportunities = Opportunite::orderByRaw("status = 'en attente' DESC")
+            $opportunities = Opportunite::with(['categorie', 'association'])->orderByRaw("status = 'en attente' DESC")
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
 
