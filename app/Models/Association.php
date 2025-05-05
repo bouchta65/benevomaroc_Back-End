@@ -7,12 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class Association extends User
 {
     protected $fillable = [
-        'description', 'telephone', 'adresse', 'ville', 'code_postal', 'site_web', 'logo', 'status'
+        'user_id', 'nom_association', 'date_creation', 'numero_rna_association', 'objet_social', 'site_web' ,'facebook','instagram', 'logo', 
+        'carte_nationale', 'status_association','statut_dossier'
     ];
 
-    public function evenements()
+
+    public function user()
     {
-        return $this->hasMany(Evenement::class);   
+        return $this->belongsTo(User::class);
+    }
+    
+
+    public function opportunitess()
+    {
+        return $this->hasMany(Opportunite::class);   
     }
     public function postules()
     {

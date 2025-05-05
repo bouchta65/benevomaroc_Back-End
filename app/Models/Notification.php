@@ -4,14 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Admin extends User
+class Notification extends Model
 {
     protected $fillable = [
-        'user_id'
+        'titre', 'message', 'date', 'heure', 'id_user'
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class);   
     }
 }
