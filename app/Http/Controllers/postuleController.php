@@ -6,8 +6,10 @@ use App\Models\Association;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Postule;
 use App\Models\Benevole;
+use App\Models\User;
 use App\Models\Opportunite;
 
 
@@ -113,36 +115,49 @@ class postuleController extends Controller
             $request->validate([
                 'etat' => 'required|string',
             ]);
-    
+
             $postulation = Postule::where('benevole_id', $benevole_id)
                 ->where('opportunite_id', $opportunite_id)
                 ->first();
-    
+
             if (!$postulation) {
                 return response()->json([
                     'message' => 'Aucune postulation trouvée pour ce bénévole et cette opportunité.'
                 ], 404);
             }
-    
+
             $nbrBenevole = Opportunite::where('id', $opportunite_id)->value('nb_benevole');
             $postulationAccpeterCount = Postule::where('opportunite_id', $opportunite_id)
                 ->where('etat', 'accepté')
                 ->count();
-    
+
             if ($request->etat === 'accepté' && $postulationAccpeterCount >= $nbrBenevole) {
                 return response()->json([
                     'message' => 'Le nombre maximum de bénévoles acceptés pour cette opportunité a été atteint.'
                 ], 403);
             }
-    
+
             $postulation->etat = $request->etat;
             $postulation->save();
-    
+            $benevole = Benevole::findOrFail($benevole_id);
+            $user = User::where('id',$benevole->user_id)->first();
+
+            $statusMessage = $request->etat === 'accepté'
+                ? 'Félicitations ! Votre postulation a été acceptée.'
+                : 'Désolé, votre postulation a été refusée.';
+
+            $url = url('Benevo-maroc/login');
+
+            Mail::raw("Bonjour {$user->prenom},\n\n{$statusMessage}\n\nVous pouvez vous connecter à votre compte en cliquant sur le lien suivant : {$url}", function ($message) use ($user) {
+                $message->to($user->email)
+                        ->subject('Mise à jour de votre postulation - Benevo Maroc');
+            });
+
             return response()->json([
                 'message' => 'Statut de la postulation mis à jour avec succès.',
                 'postulation' => $postulation
             ], 200);
-    
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erreur lors de la mise à jour du statut de la postulation.',

@@ -64,6 +64,20 @@ class CategorieController extends Controller
     public function getCategorie()
     {
         try {
+            $categorie = Categorie::Paginate(10);
+    
+            return response()->json(["categorie" => $categorie], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Catégorie non trouvée',
+                'error' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    public function getAllCategorie()
+    {
+        try {
             $categorie = Categorie::All();
 
             return response()->json(["categorie" => $categorie], 200);
@@ -71,5 +85,6 @@ class CategorieController extends Controller
             return response()->json(['message' => 'Catégorie non trouvée', 'error' => $e->getMessage()], 404);
         }
     }
+    
 
 }

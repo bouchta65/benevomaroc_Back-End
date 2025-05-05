@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 Use App\http\Controllers\AuthController;
 use App\Http\Controllers\CategorieController;
 Use App\http\Controllers\OpportunitesController;
+Use App\http\Controllers\ContactController;
 use App\Http\Controllers\postuleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CertificatController;
@@ -71,6 +72,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/dashboard/admin/opportunites/', [OpportunitesController::class, 'getAllOpportunities']);
     Route::get('/dashboard/admin/profile', [ProfileController::class, 'getProfile']);
     Route::get('/dashboard/admin/opportunites/{id}', [OpportunitesController::class, 'getOpportuniteAssocById']);
+    Route::get('/dashboard/admin/contacts/all', [ContactController::class, 'getAllMessages']);
+    Route::delete('/dashboard/admin/contacts/delete', [ContactController::class, 'deleteAllMessages']);
     
 });
 
@@ -93,5 +96,6 @@ Route::post('/association',[AuthController::class,'registerAssociation']);
 
 
 
-Route::get('/categorie', [CategorieController::class, 'getCategorie']);
+Route::get('/categorie', [CategorieController::class, 'getAllCategorie']);
+Route::post('/contact', [ContactController::class, 'sendMessage']);
 Route::get('/opportunites/{id}', [OpportunitesController::class, 'getOpportuniteById']);
