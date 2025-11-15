@@ -1,65 +1,33 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Plateforme de Bénévolat
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Description
+Cette plateforme vise à connecter les bénévoles aux associations et aux opportunités de volontariat, facilitant ainsi l'organisation et la gestion des efforts communautaires. Elle répond à un besoin crucial d'organisation efficace du volontariat, notamment après des catastrophes naturelles.
 
-## About Laravel
+## Problématique
+Après le tremblement de terre qui a frappé le Maroc, il est apparu un besoin urgent d'une plateforme centralisée pour coordonner les efforts de volontariat. Cette plateforme vise à optimiser la répartition des ressources et à faciliter la gestion des volontaires de manière efficace et sécurisée.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Objectifs Principaux
+1. **Connexion des bénévoles aux associations** : Offrir une interface simple pour rechercher et s'inscrire à des missions de bénévolat.
+2. **Gestion des événements et des bénévoles** : Permettre aux associations de créer et suivre les événements et les participants.
+3. **Promotion de la culture du bénévolat** : Sensibiliser à l'importance du volontariat et encourager l'engagement citoyen.
+4. **Conformité légale** : Assurer un cadre juridique sûr respectant les lois locales.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Fonctionnalités
+### 1. Interface Utilisateur (UI/UX)
+- Conception réactive avec **HTML5, CSS3 et JavaScript**.
+- Interface intuitive pour une expérience utilisateur optimisée.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Système de Correspondance
+- Algorithme intelligent pour associer les bénévoles aux missions appropriées.
+- Gestion des profils (bénévoles et associations).
 
-## Learning Laravel
+### 3. Évaluation et Avis
+- Système de notation et de commentaires pour renforcer la crédibilité des acteurs.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 4. Gestion des Projets et des Événements
+- Publication et gestion d'opportunités de volontariat.
+- Inscription simple pour les bénévoles.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 5. Formation et Certifications
+- Cours en ligne pour améliorer les compétences des bénévoles.
+- Délivrance de certificats électroniques de participation.
